@@ -130,6 +130,7 @@ html.light.hc .thsw{border-color:rgba(0,0,0,.55);}
   padding:12px;color:var(--txt);font-family:inherit;font-size:16px;min-height:44px;
 }
 .cloud-form button{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal);border-radius:12px;padding:0 16px;font-weight:600;min-height:44px;}
+.cloud-form button.eye{padding:0;width:44px;min-width:44px;flex:none;display:flex;align-items:center;justify-content:center;}
 .conflict-box{background:var(--surface2);border:1px solid var(--coral);border-radius:14px;padding:14px;margin-top:10px;}
 .conflict-box .opt{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
 .conflict-box .opt button{flex:1;min-width:130px;padding:12px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:.85rem;}
@@ -380,7 +381,7 @@ html.light .check-row.done .box{color:#fff;}
     </div>
   </header>
   <div class="ver" id="verFoot">
-    <span id="verApp">Calma v16</span> · <span id="verCache">caché: comprobando…</span>
+    <span id="verApp">Calma v17</span> · <span id="verCache">caché: comprobando…</span>
   </div>
 
   <!-- ============ AHORA ============ -->
@@ -1034,6 +1035,9 @@ async function probarGuardado(){
     res.innerHTML='<div class="conflict-box"><p><strong>No se puede guardar en este entorno.</strong><br>Error: <span class="mono">'+esc(DIAG.lastError)+'</span><br>Exporta tus datos antes de cerrar y pásale este texto a Claude.</p></div>';
   }
 }
+/* iconos del ojo para mostrar u ocultar la contraseña */
+const ICON_EYE = "<svg viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12Z'/><circle cx='12' cy='12' r='3.1'/></svg>";
+const ICON_EYE_OFF = "<svg viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12Z'/><circle cx='12' cy='12' r='3.1'/><path d='M4 3.6 20 20.4'/></svg>";
 function renderCloud(){
   const el=$('#cloudCard'); if(!el) return;
   if(!cloudConfigured()){
@@ -1044,7 +1048,7 @@ function renderCloud(){
     el.innerHTML='<h3>Conectar este dispositivo</h3>'+
       '<p>Entra con tu correo y contraseña. La primera vez, pulsa «Crear cuenta»; en los demás dispositivos, «Entrar» con los mismos datos.</p>'+
       '<div class="cloud-form"><input id="cloudEmail" type="email" inputmode="email" autocomplete="username" placeholder="tu correo" aria-label="Correo"></div>'+
-      '<div class="cloud-form"><input id="cloudPass" type="password" autocomplete="current-password" placeholder="contraseña (mínimo 6)" aria-label="Contraseña"><button id="cloudEye" onclick="uiTogglePass()" aria-label="Mostrar u ocultar la contraseña" title="Mostrar u ocultar">Ver</button></div>'+
+      '<div class="cloud-form"><input id="cloudPass" type="password" autocomplete="current-password" placeholder="contraseña (mínimo 6)" aria-label="Contraseña"><button id="cloudEye" class="eye" onclick="uiTogglePass()" aria-label="Mostrar la contraseña" title="Mostrar la contraseña">'+ICON_EYE+'</button></div>'+
       '<div class="bk-row" style="margin-top:10px;"><button class="accent" onclick="uiLogin()">Entrar</button><button onclick="uiSignup()">Crear cuenta</button></div>';
     return;
   }
@@ -1059,7 +1063,9 @@ function uiTogglePass(){
   const i=$('#cloudPass'), b=$('#cloudEye'); if(!i||!b) return;
   const shown = i.type==='text';
   i.type = shown ? 'password' : 'text';
-  b.textContent = shown ? 'Ver' : 'Ocultar';
+  b.innerHTML = shown ? ICON_EYE : ICON_EYE_OFF;
+  const lbl = shown ? 'Mostrar la contraseña' : 'Ocultar la contraseña';
+  b.setAttribute('aria-label', lbl); b.setAttribute('title', lbl);
   i.focus();
 }
 function cloudCreds(){
@@ -1792,7 +1798,7 @@ document.addEventListener('keydown',e=>{
    APP_VERSION vive en el HTML; el nombre de la caché lo dice el navegador.
    Si no coinciden los números, el dispositivo está sirviendo una versión
    antigua guardada: hay que cerrar la app del todo y abrirla dos veces. */
-const APP_VERSION = 'v16';
+const APP_VERSION = 'v17';
 async function renderVersion(){
   const a=$('#verApp'), c=$('#verCache'); if(!a||!c) return;
   a.textContent = 'Calma ' + APP_VERSION;
