@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0E1116">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Calma — regulación emocional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0E1116;
+  --surface:#151920;
+  --surface2:#12151b;
+  --line:rgba(255,255,255,.08);
+  --line2:rgba(255,255,255,.15);
+  --txt:#EAEEF5;
+  --muted:#9AA4B4;
+  --faint:#788395;
+  --glow:#181d25;
+  --peekbg:rgba(19,23,30,.96);
+  --teal:#4FD1C5;
+  --teal-dim:rgba(79,209,197,.14);
+  --amber:#F6C177;
+  --amber-dim:rgba(246,193,119,.14);
+  --coral:#F07178;
+  --coral-dim:rgba(240,113,120,.16);
+  --mono:'JetBrains Mono',monospace;
+  --radius:16px;
+}
+:root{--prac:#E08A5A;--prac-dim:rgba(224,138,90,.14);}
+html.light{
+  --prac:#A85425;
+  --prac-dim:rgba(168,84,37,.10);
+  --teal:#0B7C71;
+  --teal-dim:rgba(11,124,113,.10);
+  --amber:#9A6A10;
+  --amber-dim:rgba(154,106,16,.10);
+  --coral:#C23B44;
+  --coral-dim:rgba(194,59,68,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  background:var(--bg);color:var(--txt);
+  font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.55;
+  overscroll-behavior-y:contain;
+}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em;}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.mono{font-family:var(--mono);}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+
+/* ---------- layout ---------- */
+#app{max-width:520px;margin:0 auto;padding:18px 16px 120px;}
+header.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
+header.top h1{font-size:1.35rem;flex:1;}
+header.top .date{color:var(--muted);font-size:.8rem;}
+.tab-panel{display:none;animation:fadein .18s ease;}
+.tab-panel.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;}
+}
+
+/* ---------- theme popover (patrón rueda-color v57) ---------- */
+#themeWrap{position:relative;}
+#themeWrap .tbtn{background:var(--surface);border:1px solid var(--line2);border-radius:9px;color:var(--muted);font-size:15px;padding:6px 11px;cursor:pointer;transition:.14s;}
+#themeWrap .tbtn:hover{color:var(--txt);}
+#themePop{
+  position:absolute;right:0;top:42px;z-index:55;width:min(300px,86vw);
+  background:var(--peekbg);border:1px solid var(--line2);border-radius:14px;padding:14px;
+  backdrop-filter:blur(10px);
+}
+#themePop.hidden{display:none;}
+.thmodes{display:flex;gap:6px;margin-bottom:12px;}
+.thmodes .tchip{flex:1;text-align:center;}
+.tchip{border:1px solid var(--line2);background:transparent;color:var(--muted);border-radius:99px;padding:7px 13px;font-size:12.5px;font-weight:500;transition:.14s;}
+.tchip:hover{color:var(--txt);}
+.tchip.on{border-color:#8ab4ff;color:#cfe0ff;background:rgba(138,180,255,.1);}
+html.light .tchip.on{border-color:#2b6cd9;color:#2b6cd9;background:rgba(43,108,217,.08);font-weight:700;}
+.thlab{font-size:11px;color:var(--muted);margin:0 0 8px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;}
+.thsws{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px;}
+.thsw{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.2);cursor:pointer;padding:0;}
+html.light .thsw{border-color:rgba(0,0,0,.15);}
+.thsw.on{outline:2px solid #8ab4ff;outline-offset:2px;}
+.thcustom{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);}
+.thcustom input[type=color]{width:40px;height:30px;border:1px solid var(--line2);border-radius:7px;background:transparent;padding:2px;cursor:pointer;}
+.thhex{font-family:var(--mono);font-size:11.5px;margin-left:auto;}
+.thdim{opacity:.4;pointer-events:none;}
+.thct{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--muted);margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--line);}
+.thct b{font-family:var(--mono);font-size:11.5px;}
+.thct.ok b{color:#4CC38A}.thct.mid b{color:#E6C35C}.thct.ko b{color:#F07A7A}
+html.hc .tchip.on{background:#8ab4ff;color:#0E1116;border-color:#8ab4ff;font-weight:700;}
+html.light.hc .tchip.on{background:#1E5BC6;color:#fff;border-color:#1E5BC6;}
+html.hc .thsw{border-color:rgba(255,255,255,.6);}
+html.light.hc .thsw{border-color:rgba(0,0,0,.55);}
+.mini{border:1px solid var(--line2);border-radius:8px;padding:9px 12px;min-width:40px;font-size:12px;color:var(--muted);}
+.mini:hover{color:var(--txt);}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+.card h3{font-size:1rem;margin-bottom:6px;}
+.card p{color:var(--muted);font-size:.88rem;}
+.card p strong{color:var(--txt);}
+.eyebrow{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;display:block;}
+.pill{display:inline-block;font-size:.72rem;padding:2px 9px;border-radius:99px;margin-bottom:8px;}
+.pill.amber{background:var(--amber-dim);color:var(--amber);}
+.pill.teal{background:var(--teal-dim);color:var(--teal);}
+.pill.prac{background:var(--prac-dim);color:var(--prac);}
+.slot-check{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.slot-check button{
+  background:var(--surface2);border:1px solid var(--line);border-radius:14px;
+  padding:14px 8px;text-align:center;font-size:.84rem;min-height:64px;
+}
+.slot-check button .ico{display:block;font-size:1.3rem;margin-bottom:4px;}
+.slot-check button.on{background:var(--teal-dim);border-color:var(--teal);color:var(--teal);}
+.cloud-state{display:flex;align-items:center;gap:8px;font-size:.86rem;margin-bottom:10px;}
+.cloud-dot{width:10px;height:10px;border-radius:50%;background:var(--faint);flex:none;}
+.cloud-dot.ok{background:var(--teal);} .cloud-dot.sync{background:var(--amber);} 
+.cloud-dot.error{background:var(--coral);} .cloud-dot.conflict{background:var(--coral);}
+.cloud-form{display:flex;gap:8px;margin-top:10px;}
+.cloud-form input{
+  flex:1;background:var(--surface2);border:1px solid var(--line);border-radius:12px;
+  padding:12px;color:var(--txt);font-family:inherit;font-size:16px;min-height:44px;
+}
+.cloud-form button{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal);border-radius:12px;padding:0 16px;font-weight:600;min-height:44px;}
+.conflict-box{background:var(--surface2);border:1px solid var(--coral);border-radius:14px;padding:14px;margin-top:10px;}
+.conflict-box .opt{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.conflict-box .opt button{flex:1;min-width:130px;padding:12px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:.85rem;}
+.time-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
+.time-row label{color:var(--muted);font-size:.85rem;}
+.quote-day{
+  background:var(--surface);border:1px solid var(--teal);border-radius:var(--radius);
+  padding:20px 18px;margin-bottom:14px;position:relative;
+}
+.quote-day .qd-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--teal);display:block;margin-bottom:10px;}
+.quote-day .qd-text{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;line-height:1.45;}
+.quote-day .qd-shuffle{
+  position:absolute;top:10px;right:10px;min-width:44px;min-height:44px;
+  border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:1rem;
+}
+.quote-row{
+  display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;
+  padding:13px 14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;margin-bottom:9px;
+}
+.quote-row .qtext{flex:1;font-size:.9rem;line-height:1.5;}
+.quote-row .qstar,.quote-row .qdel{
+  min-width:40px;min-height:40px;flex:none;font-size:1.05rem;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;border-radius:10px;
+}
+.quote-row .qstar.on{color:var(--amber);}
+.time-row input[type=time]{
+  background:var(--surface2);border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;color:var(--txt);font-family:var(--mono);font-size:.95rem;min-height:44px;
+}
+
+/* ---------- bottom nav ---------- */
+nav.tabs{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:var(--peekbg);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;
+  padding:6px 4px calc(8px + env(safe-area-inset-bottom));
+  max-width:520px;margin:0 auto;
+}
+nav.tabs button{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 1px;border-radius:12px;color:var(--muted);font-size:.62rem;font-weight:500;
+  min-width:0;min-height:48px;justify-content:center;
+}
+nav.tabs button .ico{font-size:1.28rem;}
+nav.tabs button .lbl{display:none;}
+nav.tabs button.active .lbl{display:block;}
+nav.tabs button.active .ico{font-size:1.12rem;}
+nav.tabs button.active{color:var(--teal);background:var(--teal-dim);}
+
+/* ---------- SOS ---------- */
+#sosBtn{
+  position:fixed;right:16px;bottom:86px;z-index:41;
+  width:64px;height:64px;border-radius:50%;
+  background:#F07178;color:#0B0E14;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;
+  box-shadow:0 6px 22px rgba(240,113,120,.4);
+}
+#sosBtn:active{transform:scale(.94);}
+
+/* ---------- AHORA ---------- */
+.crisis-banner{
+  background:var(--coral-dim);border:1px solid var(--coral);
+  border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;
+  font-family:'Space Grotesk',sans-serif;font-size:1.05rem;color:var(--coral);
+}
+.big-option{
+  width:100%;display:flex;align-items:center;gap:14px;text-align:left;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 16px;margin-bottom:12px;
+}
+.big-option:active{background:var(--surface2);}
+.big-option .ico{font-size:1.6rem;}
+.big-option .t{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;}
+.big-option .s{color:var(--muted);font-size:.82rem;}
+
+/* ---------- overlays ---------- */
+.overlay{
+  position:fixed;inset:0;z-index:60;background:var(--bg);
+  display:none;flex-direction:column;padding:22px 20px calc(22px + env(safe-area-inset-bottom));
+  max-width:520px;margin:0 auto;
+}
+.overlay.open{display:flex;}
+.overlay .ov-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.overlay .ov-head h2{font-size:1.1rem;}
+.ov-close{color:var(--muted);font-size:.85rem;padding:11px 16px;min-height:44px;border:1px solid var(--line);border-radius:99px;}
+.step-body{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px;}
+.step-body .step-ico{font-size:2.6rem;}
+.step-body .step-title{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;}
+.step-body .step-text{color:var(--muted);font-size:1rem;max-width:34ch;margin:0 auto;}
+.step-count{color:var(--muted);font-size:.75rem;letter-spacing:.1em;}
+.step-timer{font-size:2rem;color:var(--amber);}
+.ov-actions{display:flex;gap:10px;}
+.btn{
+  flex:1;padding:15px;border-radius:14px;font-weight:600;font-size:.95rem;text-align:center;
+  background:var(--surface2);border:1px solid var(--line);
+}
+.btn.primary{background:var(--teal);color:#0B0E14;border:none;}
+html.light .btn.primary{color:#fff;}
+.btn.warm{background:var(--amber);color:#0B0E14;border:none;}
+html.light .btn.warm{color:#fff;}
+
+/* ---------- respiración ---------- */
+#breathWrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;}
+#breathCircle{
+  width:170px;height:170px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, rgba(79,209,197,.55), rgba(79,209,197,.12) 65%);
+  border:2px solid var(--teal);
+  transform:scale(.7);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform 1s linear;
+}
+#breathPhase{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;}
+#breathCount{font-size:2.4rem;color:var(--teal);}
+#breathCycles{color:var(--muted);font-size:.8rem;}
+.breath-note{color:var(--faint);font-size:.75rem;}
+
+/* ---------- checklists ---------- */
+.check-row{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:14px 14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;margin-bottom:9px;
+}
+.check-row .box{
+  width:24px;height:24px;border-radius:8px;border:2px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;flex:none;
+}
+.check-row.done .box{background:var(--teal);border-color:var(--teal);color:#0B0E14;}
+html.light .check-row.done .box{color:#fff;}
+.check-row.done .lbl{color:var(--muted);text-decoration:line-through;}
+.check-row .lbl{font-size:.92rem;}
+.check-row .sub{display:block;color:var(--muted);font-size:.78rem;}
+.check-row .del{margin-left:auto;color:var(--muted);font-size:1rem;padding:12px;margin:-8px -6px -8px 0;flex:none;}
+
+.add-row{display:flex;gap:8px;margin-top:4px;}
+.add-row input{
+  flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:12px;color:var(--txt);font-family:inherit;font-size:.9rem;
+}
+.add-row input::placeholder{color:var(--faint);}
+.add-row button{background:var(--teal-dim);color:var(--teal);border-radius:12px;padding:0 16px;font-weight:600;}
+
+.reassure{
+  background:var(--teal-dim);border:1px solid var(--teal);border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:14px;font-size:.9rem;color:var(--teal);
+}
+
+/* ---------- interocepción ---------- */
+.body-check{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px;}
+.body-check button{
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:14px 10px;text-align:center;font-size:.86rem;
+}
+.body-check button .ico{display:block;font-size:1.3rem;margin-bottom:4px;}
+.body-check button.on{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+#bodyResult{display:none;}
+
+/* ---------- calendario ---------- */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cal-head h3{font-size:1rem;text-transform:capitalize;}
+.cal-head button{min-width:44px;min-height:44px;padding:6px 14px;border:1px solid var(--line);border-radius:10px;color:var(--muted);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.cal-grid .dow{text-align:center;font-size:.66rem;color:var(--faint);padding:4px 0;text-transform:uppercase;}
+.cal-day{
+  aspect-ratio:1;border-radius:10px;background:var(--surface2);border:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  font-size:.72rem;color:var(--muted);position:relative;
+}
+.cal-day.empty{background:none;border:none;}
+.cal-day.today{border-color:var(--teal);}
+.cal-day .mood{font-size:.85rem;line-height:1;}
+.cal-day.mood-calm{background:var(--teal-dim);border-color:var(--teal);}
+.cal-day.mood-anx{background:var(--amber-dim);border-color:var(--amber);}
+.cal-day.mood-tense{background:var(--prac-dim);border-color:var(--prac);}
+.cal-day.mood-storm{background:var(--coral-dim);border-color:var(--coral);}
+.cal-day .sos-dot{position:absolute;top:3px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--coral);}
+.cal-day .note-dot{position:absolute;top:3px;left:4px;width:6px;height:6px;border-radius:50%;background:var(--amber);}
+.cal-checks{position:absolute;bottom:2px;left:5px;right:5px;display:flex;gap:2px;height:4px;}
+.cal-checks i{flex:1;border-radius:2px;background:var(--line2);}
+.cal-checks i.on{background:var(--teal);}
+.cal-summary{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);font-size:.82rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 14px;}
+.cal-summary b{color:var(--txt);font-weight:600;}
+.cal-legend{margin-top:8px;font-size:.76rem;color:var(--faint);line-height:1.9;}
+
+/* ---------- selector de estado del día ---------- */
+#moodPick{
+  position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.5);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+#moodPick.open{display:flex;}
+#moodPick .sheet{
+  background:var(--surface);border:1px solid var(--line2);border-radius:18px;
+  padding:18px;width:min(320px,90vw);
+}
+#moodPick h3{font-size:.95rem;margin-bottom:12px;}
+#moodPick .opts{display:flex;flex-direction:column;gap:8px;}
+#moodPick .opts button{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;text-align:left;
+  background:var(--surface2);border:1px solid var(--line);border-radius:12px;font-size:.9rem;
+}
+#moodPick .opts button .em{font-size:1.25rem;}
+#moodPick .opts button.sel{border-color:var(--teal);background:var(--teal-dim);}
+#moodPick .opts button.clear{color:var(--muted);justify-content:center;}
+#moodPick .noteIn{
+  width:100%;margin-top:10px;background:var(--surface2);border:1px solid var(--line);
+  border-radius:12px;padding:10px 12px;color:var(--txt);font-family:inherit;font-size:.86rem;resize:none;
+}
+#moodPick .noteIn::placeholder{color:var(--faint);}
+#moodPick .pick-actions{display:flex;margin-top:10px;}
+#moodPick .pick-actions button{
+  flex:1;padding:12px;min-height:44px;border-radius:12px;font-weight:600;font-size:.9rem;
+  background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal);
+}
+
+/* ---------- copia de seguridad ---------- */
+#backupTA{
+  width:100%;min-height:110px;background:var(--surface2);border:1px solid var(--line);
+  border-radius:12px;padding:10px;color:var(--txt);font-family:var(--mono);font-size:.72rem;
+  resize:vertical;margin:10px 0;
+}
+.bk-row{display:flex;gap:8px;flex-wrap:wrap;}
+.bk-row button{
+  flex:1;min-width:120px;padding:11px;border-radius:12px;font-weight:600;font-size:.85rem;
+  background:var(--surface2);border:1px solid var(--line);
+}
+.bk-row button.accent{background:var(--teal-dim);color:var(--teal);border-color:var(--teal);}
+
+/* toast */
+#toast{
+  position:fixed;left:50%;bottom:150px;transform:translateX(-50%) translateY(10px);
+  background:var(--surface);border:1px solid var(--line2);border-radius:12px;
+  padding:10px 18px;font-size:.85rem;opacity:0;pointer-events:none;transition:.25s;z-index:70;
+}
+#toast.show{opacity:1;transform:translateX(-50%);}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="saveWarn" style="display:none;background:var(--coral-dim);border:1px solid var(--coral);color:var(--coral);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.86rem;" role="alert"></div>
+  <header class="top">
+    <h1>Calma</h1>
+    <span class="date" id="todayLabel"></span>
+    <div id="themeWrap">
+      <button class="tbtn" id="themeBtn" aria-label="Tema y accesibilidad" aria-expanded="false" onclick="toggleThemePop()">🌓</button>
+      <div id="themePop" class="hidden"></div>
+    </div>
+  </header>
+
+  <!-- ============ AHORA ============ -->
+  <section class="tab-panel" id="tab-ahora">
+    <div class="crisis-banner">Si puedes, sal del sitio ahora. Busca un lugar tranquilo. Lo demás puede esperar.</div>
+    <button class="big-option" onclick="openBreath()">
+      <span class="ico">🫧</span>
+      <span><span class="t">Respirar 4-7-8</span><br><span class="s">Círculo guiado. Solo sigue el ritmo.</span></span>
+    </button>
+    <button class="big-option" onclick="openSteps('tipp')">
+      <span class="ico">🧊</span>
+      <span><span class="t">TIPP</span><br><span class="s">Bajar la activación con el cuerpo.</span></span>
+    </button>
+    <button class="big-option" onclick="openSteps('stop')">
+      <span class="ico">✋</span>
+      <span><span class="t">STOP</span><br><span class="s">Pausa antes de reaccionar.</span></span>
+    </button>
+    <div class="card">
+      <h3>Si no puedes salir</h3>
+      <p>Ponte los tapones o auriculares. Ve al borde de la sala, cerca de una pared o salida. Sujeta tu fidget y aprieta despacio. Nadie tiene que enterarse.</p>
+    </div>
+  </section>
+
+  <!-- ============ DESPUÉS ============ -->
+  <section class="tab-panel" id="tab-despues">
+    <div class="reassure">Esto no fue culpa tuya. Fue tu sistema nervioso en sobrecarga. Ahora toca recuperarse, sin prisa.</div>
+    <span class="eyebrow">Checklist de recuperación · hoy</span>
+    <div id="afterList"></div>
+    <div class="card">
+      <h3>Cuánto dura esto</h3>
+      <p>Lo que necesites. Para algunas personas son 20 minutos; para otras, el resto del día. No es tiempo perdido: es parte del proceso.</p>
+    </div>
+  </section>
+
+  <!-- ============ KIT ============ -->
+  <section class="tab-panel" id="tab-kit">
+    <span class="eyebrow">¿Lo llevo hoy en la mochila?</span>
+    <div id="kitList"></div>
+    <div class="add-row">
+      <input id="kitInput" type="text" placeholder="Añadir item al kit…" maxlength="40">
+      <button onclick="addKitItem()" aria-label="Añadir item">＋</button>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <h3>Regla del kit</h3>
+      <p>Prueba cada item en calma antes de necesitarlo en crisis. Si algo te activa en vez de calmarte (como te pasó con el chicle), fuera sin dudar: el kit se adapta a ti, no al revés.</p>
+    </div>
+  </section>
+
+  <!-- ============ BUCLE ============ -->
+  <section class="tab-panel" id="tab-bucle">
+    <div class="card">
+      <span class="pill amber">El circuito</span>
+      <p><strong>No puedo empezar → me agobio por no empezar → el agobio me bloquea más.</strong> El objetivo no es estudiar ya. El objetivo es cortar el circuito. Estudiar viene solo después.</p>
+    </div>
+    <span class="eyebrow">Corta el bucle, en orden</span>
+    <button class="big-option" onclick="openSteps('nombrar')">
+      <span class="ico">🏷️</span>
+      <span><span class="t">1 · Nómbralo</span><br><span class="s">Decir lo que pasa calma la amígdala.</span></span>
+    </button>
+    <button class="big-option" onclick="openSteps('cuerpo')">
+      <span class="ico">🚶</span>
+      <span><span class="t">2 · Mueve el cuerpo</span><br><span class="s">Descarga la tensión acumulada.</span></span>
+    </button>
+    <button class="big-option" onclick="openSteps('micro')">
+      <span class="ico">⏱️</span>
+      <span><span class="t">3 · Micro-inicio (5 min)</span><br><span class="s">Acción opuesta: empezar pequeñísimo.</span></span>
+    </button>
+    <span class="eyebrow" style="margin-top:14px;">Más herramientas de casa</span>
+    <button class="big-option" onclick="openSteps('pmr')">
+      <span class="ico">💪</span>
+      <span><span class="t">Relajación muscular</span><br><span class="s">Tensar y soltar, grupo a grupo.</span></span>
+    </button>
+    <button class="big-option" onclick="openSteps('hechos')">
+      <span class="ico">🔎</span>
+      <span><span class="t">Comprobar los hechos</span><br><span class="s">¿Qué es real y qué es rumiación?</span></span>
+    </button>
+    <button class="big-option" onclick="openBreath()">
+      <span class="ico">🫧</span>
+      <span><span class="t">Respirar 4-7-8</span><br><span class="s">También funciona en el sofá.</span></span>
+    </button>
+  </section>
+
+  <!-- ============ SUEÑO ============ -->
+  <section class="tab-panel" id="tab-sueno">
+    <div class="card">
+      <span class="pill amber">Tu foco</span>
+      <p><strong>Cortar la activación mental nocturna.</strong> Tu problema no es el móvil (2 canciones no hacen daño): es seguir en el ordenador con algo que enciende la cabeza justo antes de acostarte.</p>
+      <div class="time-row">
+        <label for="shutdownTime">Hora de cierre del ordenador:</label>
+        <input type="time" id="shutdownTime" onchange="setShutdown(this.value)" aria-label="Hora de cierre del ordenador">
+      </div>
+      <p style="margin-top:8px;font-size:.78rem;color:var(--faint);">La app no puede lanzar avisos sola: pon una alarma en el móvil a esta hora. Aquí queda escrita para que la rutina tenga un ancla fija.</p>
+    </div>
+    <span class="eyebrow">Rutina de bajada · esta noche</span>
+    <div id="sleepList"></div>
+    <div class="add-row">
+      <input id="sleepInput" type="text" placeholder="Añadir paso a la rutina…" maxlength="60">
+      <button onclick="addSleepItem()" aria-label="Añadir paso">＋</button>
+    </div>
+    <span class="eyebrow" style="margin-top:16px;">Técnicas — 🟢 respaldado · 🟡 comunidad</span>
+    <div id="sleepTech"></div>
+  </section>
+
+  <!-- ============ FRASES ============ -->
+  <section class="tab-panel" id="tab-frases">
+    <div class="quote-day">
+      <span class="qd-label">Frase del día</span>
+      <div class="qd-text" id="dayQuote"></div>
+      <button class="qd-shuffle" onclick="shuffleQuote()" aria-label="Otra frase">🔀</button>
+    </div>
+    <span class="eyebrow">Todas · ★ favorita (la frase del día sale de tus favoritas)</span>
+    <div id="quoteList"></div>
+    <div class="add-row">
+      <input id="quoteInput" type="text" placeholder="Añadir una frase tuya…" maxlength="200">
+      <button onclick="addQuote()" aria-label="Añadir frase">＋</button>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <h3>De dónde salen</h3>
+      <p>Las frases iniciales vienen de la comunidad (r/ADHD, "131 pro-tips"): son ánimo entre iguales, no citas de autor. Borra las que no te digan nada; esta pestaña solo vale si cada frase te habla a ti.</p>
+    </div>
+  </section>
+
+  <!-- ============ CUERPO ============ -->
+  <section class="tab-panel" id="tab-cuerpo">
+    <div class="card">
+      <span class="pill teal">Interocepción</span>
+      <p><strong>Tu salpicadero interno.</strong> Las señales del cuerpo (hambre, sed, calor, tensión) llegan borrosas o tarde; si no se atienden, desregulan sin avisar. Como la señal no salta sola, la sustituimos por chequeos a horas fijas.</p>
+    </div>
+    <span class="eyebrow">Chequeos programados · hoy</span>
+    <div class="card">
+      <p style="margin-bottom:10px;">Pon 3 alarmas en el móvil (por ejemplo 11:00, 17:00, 21:00). Cuando suene: 30 segundos de chequeo corporal abajo, y marca la casilla.</p>
+      <div class="slot-check" id="slotCheck"></div>
+    </div>
+    <span class="eyebrow">Chequeo corporal (interocepción)</span>
+    <div class="card" style="padding-bottom:10px;">
+      <p style="margin-bottom:10px;">Toca lo que notes ahora mismo. Las necesidades sin cubrir desregulan sin avisar.</p>
+      <div class="body-check" id="bodyCheck"></div>
+      <div class="card" id="bodyResult" style="background:var(--surface2);"></div>
+    </div>
+    <span class="eyebrow">Propiocepción — el sentido del propio cuerpo</span>
+    <div class="card">
+      <span class="pill teal">Qué es</span>
+      <h3>Saber dónde está tu cuerpo sin mirar</h3>
+      <p>Es el sentido que informa de la posición de cada parte del cuerpo y de cuánta fuerza haces: por eso puedes tocarte la nariz con los ojos cerrados o coger un huevo sin romperlo. Los receptores están en músculos y articulaciones.</p>
+    </div>
+    <div class="card">
+      <span class="pill prac">🟠 Práctica clínica</span>
+      <h3>Trabajo pesado (entrada propioceptiva)</h3>
+      <p>Empujar una pared 10 segundos, cargar la compra, flexiones, ejercicio con resistencia, subir escaleras con la mochila. En terapia ocupacional se usa como entrada que calma y organiza el sistema nervioso, y es de las pocas a las que casi nadie es hipersensible. Sin ensayos tipo Baylor detrás: es práctica profesional asentada, no estudio controlado.</p>
+    </div>
+    <div class="card">
+      <span class="pill amber">🟡 Regla del chicle</span>
+      <h3>Pruébalo en calma primero</h3>
+      <p>La literatura de terapia ocupacional avisa: estas sensaciones pueden calmar o activar según cada sistema nervioso. Prueba cada técnica un día tranquilo; si te acelera (como el chicle), fuera. Ya tienes verificada la que sí funciona en tu caso base: la presión profunda.</p>
+    </div>
+  </section>
+
+  <!-- ============ REGISTRO ============ -->
+  <section class="tab-panel" id="tab-registro">
+    <span class="eyebrow">Registro de días</span>
+    <div class="card">
+      <div class="cal-head">
+        <button onclick="calMove(-1)" aria-label="Mes anterior">‹</button>
+        <h3 id="calTitle"></h3>
+        <button onclick="calMove(1)" aria-label="Mes siguiente">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-summary" id="calSummary"></div>
+      <div class="cal-legend">
+        Toca un día para elegir su estado (el color de fondo) y apuntar una nota corta.<br>
+        Punto rojo: usaste SOS. Punto ámbar: hay nota. Las 3 rayitas de abajo son los chequeos corporales (mañana · tarde · noche).
+      </div>
+    </div>
+    <span class="eyebrow">Nube — sincronizar entre dispositivos</span>
+    <div class="card" id="cloudCard"></div>
+    <span class="eyebrow">Diagnóstico de guardado</span>
+    <div class="card" id="diagCard"></div>
+    <span class="eyebrow">Copia de seguridad</span>
+    <div class="card">
+      <p>Genera una copia para guardarla donde quieras. Para restaurar (o migrar a una versión nueva de la app), pega la copia en el cuadro e importa.</p>
+      <textarea id="backupTA" placeholder="Aquí aparecerá tu copia, o pega una para importarla." spellcheck="false"></textarea>
+      <div class="bk-row">
+        <button onclick="genBackup()">Generar copia</button>
+        <button onclick="copyBackup()">Copiar</button>
+        <button class="accent" onclick="importBackup()">Importar lo pegado</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- SOS -->
+<button id="sosBtn" onclick="goSOS()" aria-label="SOS: ir a ayuda inmediata">SOS</button>
+
+<!-- bottom nav -->
+<nav class="tabs">
+  <button data-tab="ahora"    onclick="setTab('ahora')" aria-label="Ahora"><span class="ico">🆘</span><span class="lbl">Ahora</span></button>
+  <button data-tab="despues"  onclick="setTab('despues')" aria-label="Después"><span class="ico">🔋</span><span class="lbl">Después</span></button>
+  <button data-tab="kit"      onclick="setTab('kit')" aria-label="Kit"><span class="ico">🎒</span><span class="lbl">Kit</span></button>
+  <button data-tab="bucle"    onclick="setTab('bucle')" aria-label="Bucle"><span class="ico">🌀</span><span class="lbl">Bucle</span></button>
+  <button data-tab="sueno"    onclick="setTab('sueno')" aria-label="Sueño"><span class="ico">😴</span><span class="lbl">Sueño</span></button>
+  <button data-tab="frases"   onclick="setTab('frases')" aria-label="Frases"><span class="ico">💬</span><span class="lbl">Frases</span></button>
+  <button data-tab="cuerpo"   onclick="setTab('cuerpo')" aria-label="Cuerpo"><span class="ico">🫀</span><span class="lbl">Cuerpo</span></button>
+  <button data-tab="registro" onclick="setTab('registro')" aria-label="Registro"><span class="ico">📊</span><span class="lbl">Registro</span></button>
+</nav>
+
+<!-- selector de estado del día -->
+<div id="moodPick" onclick="if(event.target===this)closeMoodPick()">
+  <div class="sheet">
+    <h3 id="moodPickTitle">¿Cómo fue el día?</h3>
+    <div class="opts" id="moodOpts"></div>
+    <textarea id="dayNote" class="noteIn" placeholder="Nota corta: qué pasó ese día (opcional)" maxlength="120" rows="2" aria-label="Nota del día"></textarea>
+    <div class="pick-actions"><button onclick="saveDayNote()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- overlay: step-through -->
+<div class="overlay" id="stepsOverlay">
+  <div class="ov-head">
+    <h2 id="stepsTitle"></h2>
+    <button class="ov-close" onclick="closeSteps()">Cerrar ✕</button>
+  </div>
+  <div class="step-body">
+    <div class="step-count" id="stepCount"></div>
+    <div class="step-ico" id="stepIco"></div>
+    <div class="step-title" id="stepTitle"></div>
+    <div class="step-text" id="stepText"></div>
+    <div class="step-timer mono" id="stepTimer" style="display:none;"></div>
+  </div>
+  <div class="ov-actions">
+    <button class="btn" id="stepBack" onclick="stepMove(-1)">Atrás</button>
+    <button class="btn primary" id="stepNext" onclick="stepMove(1)">Siguiente</button>
+  </div>
+</div>
+
+<!-- overlay: respiración -->
+<div class="overlay" id="breathOverlay">
+  <div class="ov-head">
+    <h2>Respirar 4-7-8</h2>
+    <button class="ov-close" onclick="closeBreath()">Cerrar ✕</button>
+  </div>
+  <div id="breathWrap">
+    <div id="breathCircle"><span id="breathCount" class="mono"></span></div>
+    <div id="breathPhase">Cuando quieras, pulsa empezar</div>
+    <div id="breathCycles"></div>
+    <div class="breath-note" id="breathVibNote"></div>
+  </div>
+  <div class="ov-actions">
+    <button class="btn warm" id="breathBtn" onclick="toggleBreath()">Empezar</button>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =================== adaptador de almacenamiento =================== */
+/* Dentro de Claude existe window.storage (ligado a tu cuenta: se comparte entre tus
+   dispositivos). Fuera de Claude no existe: usamos localStorage del navegador, que
+   es LOCAL a cada dispositivo. El puente entre almacenes es Exportar/Importar. */
+(function(){
+  if(window.storage) return; // entorno Claude: no tocar nada
+  var PRE='calma:';
+  var ls=null;
+  try{ ls=window.localStorage; ls.setItem(PRE+'__t','1'); ls.removeItem(PRE+'__t'); }catch(e){ ls=null; }
+  if(ls){
+    window.storage={
+      get:function(k){ var v=ls.getItem(PRE+k); return Promise.resolve(v===null?null:{key:k,value:v}); },
+      set:function(k,v){ try{ ls.setItem(PRE+k,String(v)); return Promise.resolve({key:k,value:v}); }catch(e){ return Promise.reject(e); } },
+      delete:function(k){ ls.removeItem(PRE+k); return Promise.resolve({key:k,deleted:true}); },
+      list:function(pfx){ var keys=[]; for(var i=0;i<ls.length;i++){ var kk=ls.key(i); if(kk&&kk.indexOf(PRE+(pfx||''))===0) keys.push(kk.slice(PRE.length)); } return Promise.resolve({keys:keys}); }
+    };
+    window.__storageBackend='localStorage';
+  }else{
+    // último recurso: memoria de la sesión (sin persistencia); la app avisa al guardar
+    var mem={};
+    window.storage={
+      get:function(k){ return Promise.resolve(k in mem?{key:k,value:mem[k]}:null); },
+      set:function(k,v){ mem[k]=String(v); return Promise.resolve({key:k,value:v}); },
+      delete:function(k){ delete mem[k]; return Promise.resolve({key:k,deleted:true}); },
+      list:function(){ return Promise.resolve({keys:Object.keys(mem)}); }
+    };
+    window.__storageBackend='memoria';
+  }
+})();
+if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+  try{ navigator.serviceWorker.register('sw.js'); }catch(e){}
+}
+
+/* =================== helpers de color (rueda-color v57, copiados tal cual) =================== */
+function rgbOf(hex){var n=parseInt(hex.slice(1),16);return{r:n>>16,g:(n>>8)&255,b:n&255};}
+function toHex(x){return x.toString(16).padStart(2,'0');}
+function hslOf(hex){var c=rgbOf(hex),r=c.r/255,g=c.g/255,b=c.b/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),h,s,l=(mx+mn)/2;
+ if(mx===mn){h=s=0;}else{var d=mx-mn;s=l>0.5?d/(2-mx-mn):d/(mx+mn);
+  if(mx===r)h=(g-b)/d+(g<b?6:0);else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h/=6;}
+ return{h:Math.round(h*360),s:Math.round(s*100),l:Math.round(l*100)};}
+function hslToHex(h,s,l){s/=100;l/=100;var k=function(n){return (n+h/30)%12;},a=s*Math.min(l,1-l),
+ f=function(n){var x=l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));return Math.round(255*x);};
+ return '#'+toHex(f(0))+toHex(f(8))+toHex(f(4));}
+function relLum(hex){var c=rgbOf(hex);function ch(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);}return 0.2126*ch(c.r)+0.7152*ch(c.g)+0.0722*ch(c.b);}
+function contrastRatio(a,b){var x=relLum(a),y=relLum(b),hi=Math.max(x,y),lo=Math.min(x,y);return (hi+0.05)/(lo+0.05);}
+function normHex(v){v=(v||'').trim();if(/^#?[0-9a-fA-F]{3}$/.test(v)){v=v.replace('#','');v=v[0]+v[0]+v[1]+v[1]+v[2]+v[2];}if(/^#?[0-9a-fA-F]{6}$/.test(v))return ('#'+v.replace('#','')).toUpperCase();return null;}
+function $(s){return document.querySelector(s);}
+
+/* =================== sistema de temas (rueda-color v57) =================== */
+var THEME_KEY='calma_theme_v1';
+var THEME={mode:'auto',dark:'#0E1116',light:'#F3F4F7',hc:false,ts:1};
+var DARK_PRESETS=[
+ {es:'Negro azabache',hex:'#0E1116'},
+ {es:'Azul medianoche',hex:'#101A30'},
+ {es:'Gris oscuro',hex:'#17191E'},
+ {es:'Verde abeto',hex:'#0D1A16'},
+ {es:'Berenjena',hex:'#191024'},
+ {es:'Café',hex:'#1A1410'}
+];
+var LIGHT_PRESETS=[
+ {es:'Gris perla',hex:'#F3F4F7'},
+ {es:'Blanco puro',hex:'#FFFFFF'},
+ {es:'Crema',hex:'#FAF5EA'},
+ {es:'Sepia',hex:'#F3ECDC'},
+ {es:'Azul hielo',hex:'#EDF2FA'},
+ {es:'Salvia clara',hex:'#EEF4EE'}
+];
+function clampDarkBase(hex){var h=hslOf(hex);return hslToHex(h.h,Math.min(h.s,55),Math.min(h.l,16));}
+function clampLightBase(hex){var h=hslOf(hex);return hslToHex(h.h,Math.min(h.s,42),Math.max(h.l,86));}
+function shiftL(hex,dl){var h=hslOf(hex);return hslToHex(h.h,h.s,Math.max(0,Math.min(100,h.l+dl)));}
+function hexToRgba(hex,a){var c=rgbOf(hex);return 'rgba('+c.r+','+c.g+','+c.b+','+a+')';}
+function sysDark(){
+ if(window.matchMedia){try{return window.matchMedia('(prefers-color-scheme: dark)').matches;}catch(e){}}
+ return true;
+}
+function effMode(){return THEME.mode==='auto'?(sysDark()?'dark':'light'):THEME.mode;}
+function faintFor(base,dark){
+ var worst=dark?shiftL(base,4):shiftL(base,-3);
+ var c=rgbOf(dark?'#788395':'#626B79'),step=dark?2:-2,hex='';
+ for(var i=0;i<80;i++){
+  hex='#'+[c.r,c.g,c.b].map(function(v){return toHex(Math.max(0,Math.min(255,v)));}).join('');
+  if(contrastRatio(hex,worst)>=4.5&&contrastRatio(hex,base)>=4.5)return hex;
+  c.r+=step;c.g+=step;c.b+=step;
+ }
+ return dark?'#C7D0DC':'#333C49';
+}
+function mutedFor(base,dark){
+ var worst=dark?shiftL(base,4):shiftL(base,-3);
+ var c=rgbOf(dark?'#9AA4B4':'#5A6472'),step=dark?2:-2,hex='';
+ for(var i=0;i<80;i++){
+  hex='#'+[c.r,c.g,c.b].map(function(v){return toHex(Math.max(0,Math.min(255,v)));}).join('');
+  if(contrastRatio(hex,worst)>=4.5&&contrastRatio(hex,base)>=4.5)return hex;
+  c.r+=step;c.g+=step;c.b+=step;
+ }
+ return dark?'#C7D0DC':'#333C49';
+}
+function applyTheme(){
+ var rt=document.documentElement,st=rt.style,mt=document.querySelector('meta[name="theme-color"]');
+ if(effMode()==='light'){
+  rt.classList.add('light');
+  var lb=clampLightBase(THEME.light||'#F3F4F7');
+  st.setProperty('--bg',lb);
+  st.setProperty('--surface',shiftL(lb,6));st.setProperty('--surface2',shiftL(lb,-3));
+  st.setProperty('--line','rgba(15,23,42,.08)');st.setProperty('--line2','rgba(15,23,42,.18)');
+  st.setProperty('--txt','#1B2430');st.setProperty('--muted',mutedFor(lb,false));st.setProperty('--faint',faintFor(lb,false));
+  st.setProperty('--glow',shiftL(lb,5));st.setProperty('--peekbg',hexToRgba(shiftL(lb,6),0.97));
+  if(mt)mt.setAttribute('content',lb);
+ }else{
+  rt.classList.remove('light');
+  var bg=clampDarkBase(THEME.dark||'#0E1116');
+  st.setProperty('--bg',bg);
+  st.setProperty('--surface',shiftL(bg,4));st.setProperty('--surface2',shiftL(bg,2));
+  st.setProperty('--line','rgba(255,255,255,.08)');st.setProperty('--line2','rgba(255,255,255,.15)');
+  st.setProperty('--txt','#EAEEF5');st.setProperty('--muted',mutedFor(bg,true));st.setProperty('--faint',faintFor(bg,true));
+  st.setProperty('--glow',shiftL(bg,6));st.setProperty('--peekbg',hexToRgba(shiftL(bg,3),0.96));
+  if(mt)mt.setAttribute('content',bg);
+ }
+ if(THEME.hc){
+  rt.classList.add('hc');
+  if(effMode()==='light'){
+   st.setProperty('--line','rgba(15,23,42,.35)');st.setProperty('--line2','rgba(15,23,42,.65)');
+   st.setProperty('--txt','#000000');st.setProperty('--muted','#333C49');st.setProperty('--faint','#4A5462');
+  }else{
+   st.setProperty('--line','rgba(255,255,255,.3)');st.setProperty('--line2','rgba(255,255,255,.6)');
+   st.setProperty('--txt','#FFFFFF');st.setProperty('--muted','#C7D0DC');st.setProperty('--faint','#9AA4B4');
+  }
+ }else rt.classList.remove('hc');
+ if(document.body)document.body.style.zoom=(THEME.ts&&THEME.ts!==1)?THEME.ts:'';
+ renderThemePop();
+}
+if(window.matchMedia){
+ try{
+  var _mq=window.matchMedia('(prefers-color-scheme: dark)');
+  var _onSys=function(){if(THEME.mode==='auto')applyTheme();};
+  if(_mq.addEventListener)_mq.addEventListener('change',_onSys);
+  else if(_mq.addListener)_mq.addListener(_onSys);
+ }catch(e){}
+}
+var _lastThemeJSON='';
+function saveTheme(){
+  try{
+    var j=JSON.stringify(THEME);
+    if(j===_lastThemeJSON) return;   // nada cambió: no gastamos una escritura
+    _lastThemeJSON=j;
+    window.storage.set(THEME_KEY,j);
+  }catch(e){}
+}
+function loadTheme(){return window.storage.get(THEME_KEY).then(function(r){
+ if(!(r&&r.value)){
+  try{if(window.matchMedia&&matchMedia('(prefers-contrast: more)').matches)THEME.hc=true;}catch(e){}
+  return;
+ }
+ if(r&&r.value){var o=JSON.parse(r.value);
+  if(o&&(o.mode==='dark'||o.mode==='light'||o.mode==='auto'))THEME.mode=o.mode;
+  if(o&&o.dark&&normHex(o.dark))THEME.dark=normHex(o.dark);
+  if(o&&o.light&&normHex(o.light))THEME.light=normHex(o.light);
+  if(o)THEME.hc=!!o.hc;
+  if(o&&o.ts&&TS_STEPS.indexOf(o.ts)>=0)THEME.ts=o.ts;
+ }
+}).catch(function(){});}
+window.setThemeMode=function(m){THEME.mode=m;saveTheme();applyTheme();};
+window.setThemeDark=function(hex){var h=normHex(hex);if(!h)return;THEME.dark=h;if(THEME.mode!=='auto')THEME.mode='dark';saveTheme();applyTheme();};
+window.setThemeLight=function(hex){var h=normHex(hex);if(!h)return;THEME.light=h;if(THEME.mode!=='auto')THEME.mode='light';saveTheme();applyTheme();};
+window.toggleHC=function(){THEME.hc=!THEME.hc;saveTheme();applyTheme();};
+var TS_STEPS=[0.9,1,1.1,1.25];
+window.setTS=function(d){
+ if(d===0)THEME.ts=1;
+ else{var i=TS_STEPS.indexOf(THEME.ts||1);if(i<0)i=1;i=Math.max(0,Math.min(TS_STEPS.length-1,i+d));THEME.ts=TS_STEPS[i];}
+ saveTheme();applyTheme();
+};
+window.toggleThemePop=function(){var el=$('#themePop');el.classList.toggle('hidden');var open=!el.classList.contains('hidden');var b=$('#themeBtn');if(b)b.setAttribute('aria-expanded',open?'true':'false');if(open)renderThemePop();};
+function thSwRow(presets,curRaw,fn){
+ return presets.map(function(pp){
+  var on=curRaw===pp.hex.toUpperCase();
+  return '<button class="thsw'+(on?' on':'')+'" style="background:'+pp.hex+'" title="'+pp.es+'" aria-label="'+pp.es+'" onclick="'+fn+'(&#39;'+pp.hex+'&#39;)"></button>';
+ }).join('');
+}
+function thCtLine(txt,bg,dim){
+ var r=contrastRatio(txt,bg),rs=(Math.round(r*10)/10).toFixed(1);
+ var lvl=r>=7?'AAA':(r>=4.5?'AA':'\u2717');
+ var cls=r>=7?'ok':(r>=4.5?'mid':'ko');
+ return '<div class="thct '+cls+dim+'"><span>Contraste del texto</span><b>'+rs+':1 \u00b7 '+lvl+'</b></div>';
+}
+function renderThemePop(){
+ var el=$('#themePop');if(!el||el.classList.contains('hidden'))return;
+ var curD=(normHex(THEME.dark||'#0E1116')||'#0E1116').toUpperCase();
+ var curL=(normHex(THEME.light||'#F3F4F7')||'#F3F4F7').toUpperCase();
+ var chips='<div class="thmodes">'
+  +'<button class="tchip'+(THEME.mode==='light'?' on':'')+'" onclick="setThemeMode(&#39;light&#39;)">\u2600\ufe0e Claro</button>'
+  +'<button class="tchip'+(THEME.mode==='dark'?' on':'')+'" onclick="setThemeMode(&#39;dark&#39;)">\u263d Oscuro</button>'
+  +'<button class="tchip'+(THEME.mode==='auto'?' on':'')+'" onclick="setThemeMode(&#39;auto&#39;)">\u25d0 Sistema</button></div>';
+ var dimD=(THEME.mode==='light')?' thdim':'';
+ var dimL=(THEME.mode==='dark')?' thdim':'';
+ el.innerHTML=chips
+  +'<div class="thlab'+dimD+'">Fondo oscuro</div>'
+  +'<div class="thsws'+dimD+'">'+thSwRow(DARK_PRESETS,THEME.mode==='light'?'':curD,'setThemeDark')+'</div>'
+  +'<div class="thcustom'+dimD+'"><input type="color" value="'+curD+'" onchange="setThemeDark(this.value)" aria-label="Color oscuro a tu elección"><span>A tu elección</span><span class="thhex">'+curD+'</span></div>'
+  +thCtLine('#EAEEF5',clampDarkBase(curD),dimD)
+  +'<div style="height:12px"></div>'
+  +'<div class="thlab'+dimL+'">Fondo claro</div>'
+  +'<div class="thsws'+dimL+'">'+thSwRow(LIGHT_PRESETS,THEME.mode==='dark'?'':curL,'setThemeLight')+'</div>'
+  +'<div class="thcustom'+dimL+'"><input type="color" value="'+curL+'" onchange="setThemeLight(this.value)" aria-label="Color claro a tu elección"><span>A tu elección</span><span class="thhex">'+curL+'</span></div>'
+  +thCtLine('#1B2430',clampLightBase(curL),dimL)
+  +'<div class="thlab" style="margin-top:12px">Accesibilidad</div>'
+  +'<div class="thmodes" style="margin-bottom:10px"><button class="tchip'+(THEME.hc?' on':'')+'" aria-pressed="'+(THEME.hc?'true':'false')+'" onclick="toggleHC()">Alto contraste</button></div>'
+  +'<div class="thcustom"><span>Tamaño del texto</span><span style="margin-left:auto;display:flex;gap:6px;align-items:center"><button class="mini" onclick="setTS(-1)">A\u2212</button><button class="mini" onclick="setTS(0)">A</button><button class="mini" onclick="setTS(1)">A+</button><span class="thhex" style="margin-left:4px">'+Math.round((THEME.ts||1)*100)+'%</span></span></div>';
+}
+document.addEventListener('click',function(e){
+ var wrp=$('#themeWrap');
+ if(wrp&&!wrp.contains(e.target))$('#themePop').classList.add('hidden');
+});
+
+/* ============================================================
+   MÓDULO NUBE v1 — sincronización entre dispositivos (Supabase)
+   Portable: pégalo en cualquier app y cambia solo CLOUD_CFG.appId
+   Requiere: window.storage (el adaptador) y las funciones
+   getState() / setState() que cada app define abajo del módulo.
+   ============================================================ */
+const CLOUD_CFG = {
+  url:     '',          // ← pega aquí tu Project URL de Supabase
+  anonKey: '',          // ← pega aquí tu clave anon/public
+  appId:   'calma'      // ← identificador ÚNICO de esta app
+};
+
+const CLOUD = { session:null, meta:{lastLocalChange:0, lastSyncedAt:0, lastRemoteUpdatedAt:0}, busy:false, status:'off' };
+const SESS_KEY = CLOUD_CFG.appId + '-cloud-session';
+const META_KEY = CLOUD_CFG.appId + '-sync-meta';
+
+function cloudConfigured(){ return !!(CLOUD_CFG.url && CLOUD_CFG.anonKey); }
+
+/* ---------- decisión de sincronización (pura, testeable) ---------- */
+function decideSync(meta, remote){
+  const localChanged = meta.lastLocalChange > meta.lastSyncedAt;
+  if(!remote) return localChanged || meta.lastSyncedAt===0 ? 'push' : 'none';
+  const remoteChanged = remote.updated_ms > meta.lastRemoteUpdatedAt;
+  if(remoteChanged && localChanged) return 'conflict';
+  if(remoteChanged) return 'pull';
+  if(localChanged) return 'push';
+  return 'none';
+}
+
+/* ---------- REST ---------- */
+async function api(path, opts){
+  const o = opts || {};
+  const headers = Object.assign({'apikey':CLOUD_CFG.anonKey,'Content-Type':'application/json'}, o.headers||{});
+  if(CLOUD.session && CLOUD.session.access_token && !o.noAuth) headers['Authorization']='Bearer '+CLOUD.session.access_token;
+  const res = await fetch(CLOUD_CFG.url.replace(/\/+$/,'') + path, {method:o.method||'GET', headers, body:o.body?JSON.stringify(o.body):undefined});
+  if(res.status===401 && !o.retried && CLOUD.session && CLOUD.session.refresh_token){
+    const ok = await refreshSession();
+    if(ok) return api(path, Object.assign({}, o, {retried:true}));
+  }
+  const txt = await res.text();
+  let data=null; try{ data = txt?JSON.parse(txt):null; }catch(e){ data = txt; }
+  if(!res.ok) throw new Error((data && (data.msg||data.message||data.error_description)) || ('HTTP '+res.status));
+  return data;
+}
+async function refreshSession(){
+  try{
+    const d = await api('/auth/v1/token?grant_type=refresh_token', {method:'POST', noAuth:true, body:{refresh_token:CLOUD.session.refresh_token}});
+    CLOUD.session = {access_token:d.access_token, refresh_token:d.refresh_token, email:(d.user&&d.user.email)||CLOUD.session.email, user_id:(d.user&&d.user.id)||CLOUD.session.user_id};
+    await window.storage.set(SESS_KEY, JSON.stringify(CLOUD.session));
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ---------- autenticación por código de 6 dígitos (sin contraseña) ---------- */
+async function cloudSendCode(email){
+  await api('/auth/v1/otp', {method:'POST', noAuth:true, body:{email:email, create_user:true}});
+}
+async function cloudVerifyCode(email, code){
+  const d = await api('/auth/v1/verify', {method:'POST', noAuth:true, body:{email:email, token:code, type:'email'}});
+  CLOUD.session = {access_token:d.access_token, refresh_token:d.refresh_token, email:(d.user&&d.user.email)||email, user_id:d.user&&d.user.id};
+  await window.storage.set(SESS_KEY, JSON.stringify(CLOUD.session));
+}
+async function cloudDisconnect(){
+  CLOUD.session=null; CLOUD.status='off';
+  try{ await window.storage.delete(SESS_KEY); }catch(e){}
+}
+
+/* ---------- datos ---------- */
+async function cloudFetchRemote(){
+  const rows = await api('/rest/v1/app_state?app_id=eq.'+encodeURIComponent(CLOUD_CFG.appId)+'&select=data,updated_at');
+  if(!rows || !rows.length) return null;
+  return {data:rows[0].data, updated_ms:Date.parse(rows[0].updated_at)||0, updated_at:rows[0].updated_at};
+}
+async function cloudPush(){
+  const now = new Date().toISOString();
+  await api('/rest/v1/app_state', {method:'POST',
+    headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:[{user_id:CLOUD.session.user_id, app_id:CLOUD_CFG.appId, data:getState(), updated_at:now}]});
+  const ms = Date.parse(now);
+  CLOUD.meta.lastSyncedAt = Date.now();
+  CLOUD.meta.lastRemoteUpdatedAt = ms;
+  await saveMeta();
+}
+async function cloudPull(remote){
+  setState(remote.data);
+  CLOUD.meta.lastSyncedAt = Date.now();
+  CLOUD.meta.lastLocalChange = CLOUD.meta.lastSyncedAt;
+  CLOUD.meta.lastRemoteUpdatedAt = remote.updated_ms;
+  await saveMeta();
+}
+/* La meta viaja DENTRO del estado de la app: así cada cambio provoca UNA sola
+   escritura, no dos. Evita agotar el límite de peticiones del almacenamiento. */
+async function saveMeta(){ try{ if(typeof S==='object'&&S) S.__sync=CLOUD.meta; }catch(e){} }
+function markLocalChange(){ CLOUD.meta.lastLocalChange = Date.now(); saveMeta(); }
+
+/* ---------- orquestación ---------- */
+async function cloudSync(opts){
+  const o=opts||{};
+  if(!cloudConfigured() || !CLOUD.session || CLOUD.busy) return;
+  CLOUD.busy=true; CLOUD.status='sync'; renderCloud();
+  try{
+    const remote = await cloudFetchRemote();
+    let action = decideSync(CLOUD.meta, remote);
+    if(o.force) action = o.force;
+    if(action==='conflict'){ CLOUD.status='conflict'; CLOUD.busy=false; showConflict(remote); return; }
+    if(action==='push') await cloudPush();
+    else if(action==='pull'){ await cloudPull(remote); renderAll(); }
+    CLOUD.status='ok';
+  }catch(e){
+    CLOUD.status='error'; CLOUD.lastError=e.message||String(e);
+  }
+  CLOUD.busy=false; renderCloud();
+}
+async function cloudInit(){
+  if(!cloudConfigured()) return;
+  try{ if(S && S.__sync) CLOUD.meta=Object.assign(CLOUD.meta, S.__sync); }catch(e){}
+  try{ const s=await window.storage.get(SESS_KEY); if(s&&s.value){ CLOUD.session=JSON.parse(s.value); CLOUD.status='idle'; } }catch(e){}
+  renderCloud();
+  if(CLOUD.session) cloudSync();
+}
+
+/* ---------- puentes de la app con el módulo ---------- */
+function getState(){ return S; }
+function setState(obj){
+  S = Object.assign(deepClone(DEFAULT_STATE), obj||{});
+  migrateQuotes();
+  try{ window.storage.set(KEY, JSON.stringify(S)); }catch(e){}
+}
+function fmtWhen(ms){
+  if(!ms) return 'nunca';
+  const d=new Date(ms);
+  return d.toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+}
+function renderDiag(){
+  const el=$('#diagCard'); if(!el) return;
+  const backend={claude:'Claude (tu cuenta)', localStorage:'Este navegador', memoria:'Memoria temporal (NO guarda)'}[DIAG.backend]||DIAG.backend;
+  const nunca=!DIAG.lastOk;
+  el.innerHTML='<p><strong>Dónde guarda:</strong> '+esc(backend)+'<br>'+
+    '<strong>Último guardado correcto:</strong> '+(nunca?'todavía ninguno':fmtWhen(DIAG.lastOk))+'<br>'+
+    '<strong>Guardados en total:</strong> '+DIAG.writes+'<br>'+
+    '<strong>Fallos en esta sesión:</strong> '+DIAG.fails+
+    (DIAG.lastError?'<br><strong>Último error:</strong> <span class="mono">'+esc(DIAG.lastError)+'</span>':'')+
+    '</p>'+
+    (nunca?'<p style="font-size:.8rem;color:var(--muted);">Todavía no se ha guardado nada. No es un fallo: hace falta que cambies algo, o que pulses el botón de abajo.</p>':'<p style="font-size:.8rem;color:var(--muted);">El total y la fecha se conservan al cerrar la app: si al volver siguen aquí, la persistencia funciona.</p>')+
+    '<div class="bk-row" style="margin-top:10px;"><button class="accent" onclick="probarGuardado()">Probar guardado ahora</button></div>'+
+    '<div id="diagResult"></div>'+
+    '<p style="margin-top:8px;font-size:.78rem;color:var(--faint);">Si algo falla, copia esta tarjeta y pásamela: con el texto exacto del error sé qué arreglar.</p>';
+}
+async function probarGuardado(){
+  const res=$('#diagResult');
+  res.innerHTML='<p style="margin-top:10px;">Probando…</p>';
+  const marca='prueba-'+Date.now();
+  let escrito=false, leido=null, err='';
+  try{
+    await window.storage.set(KEY+'-test', marca);
+    escrito=true;
+    const r=await window.storage.get(KEY+'-test');
+    leido=r&&r.value;
+    try{ await window.storage.delete(KEY+'-test'); }catch(e){}
+  }catch(e){ err=(e&&(e.message||e.name))||String(e); }
+  if(escrito && leido===marca){
+    // ahora una escritura real del estado, para comprobar el tamaño completo
+    try{
+      const stamp=Date.now();
+      const prev=(S.__diag&&S.__diag.writes)||0;
+      S.__diag={lastOk:stamp, writes:prev+1};
+      await window.storage.set(KEY, JSON.stringify(S));
+      DIAG.writes=prev+1; DIAG.lastOk=stamp; DIAG.lastError='';
+      res.innerHTML='<div class="conflict-box" style="border-color:var(--teal);"><p style="color:var(--teal);"><strong>Guardado correcto.</strong> Escribí y volví a leer el dato de prueba, y también tus datos reales ('+JSON.stringify(S).length+' caracteres). El almacenamiento funciona.</p></div>';
+    }catch(e2){
+      DIAG.fails++; DIAG.lastError=(e2&&(e2.message||e2.name))||String(e2);
+      res.innerHTML='<div class="conflict-box"><p><strong>La prueba pequeña pasó, pero guardar TUS datos falló.</strong><br>Tamaño: '+JSON.stringify(S).length+' caracteres.<br>Error: <span class="mono">'+esc(DIAG.lastError)+'</span><br>Copia este texto y pásaselo a Claude.</p></div>';
+    }
+  }else{
+    DIAG.fails++; DIAG.lastError=err||'escribió pero al leer devolvió otra cosa';
+    res.innerHTML='<div class="conflict-box"><p><strong>No se puede guardar en este entorno.</strong><br>Error: <span class="mono">'+esc(DIAG.lastError)+'</span><br>Exporta tus datos antes de cerrar y pásale este texto a Claude.</p></div>';
+  }
+}
+function renderCloud(){
+  const el=$('#cloudCard'); if(!el) return;
+  if(!cloudConfigured()){
+    el.innerHTML='<h3>Sin configurar</h3><p>Abre este archivo y rellena <span class="mono">CLOUD_CFG.url</span> y <span class="mono">CLOUD_CFG.anonKey</span> con los datos de tu proyecto de Supabase. Los pasos están en GUIA-supabase.md. Mientras tanto, la app funciona igual: guarda en este dispositivo.</p>';
+    return;
+  }
+  if(!CLOUD.session){
+    el.innerHTML='<h3>Conectar este dispositivo</h3>'+
+      '<p>Te enviamos un código de 6 dígitos por correo. Sin contraseñas.</p>'+
+      '<div class="cloud-form"><input id="cloudEmail" type="email" inputmode="email" placeholder="tu correo" aria-label="Correo"><button onclick="uiSendCode()">Enviar código</button></div>'+
+      '<div class="cloud-form" id="codeRow" style="display:none;"><input id="cloudCode" type="text" inputmode="numeric" maxlength="8" placeholder="código de 6 dígitos" aria-label="Código"><button onclick="uiVerifyCode()">Entrar</button></div>';
+    return;
+  }
+  const st=CLOUD.status;
+  const label={off:'Desconectado', idle:'Conectado', sync:'Sincronizando…', ok:'Al día', error:'Error: '+(CLOUD.lastError||''), conflict:'Hay un conflicto que resolver'}[st]||st;
+  el.innerHTML='<div class="cloud-state"><span class="cloud-dot '+st+'"></span><span>'+esc(label)+'</span></div>'+
+    '<p>Cuenta: <span class="mono">'+esc(CLOUD.session.email||'')+'</span><br>Última sincronización: '+fmtWhen(CLOUD.meta.lastSyncedAt)+'</p>'+
+    '<div class="bk-row" style="margin-top:10px;"><button class="accent" onclick="cloudSync()">Sincronizar ahora</button><button onclick="uiDisconnect()">Desconectar</button></div>'+
+    '<div id="conflictSlot"></div>';
+}
+async function uiSendCode(){
+  const em=($('#cloudEmail').value||'').trim();
+  if(!em){ toast('Escribe tu correo.'); return; }
+  try{ await cloudSendCode(em); $('#codeRow').style.display='flex'; toast('Código enviado. Míralo en tu correo.'); }
+  catch(e){ toast('No se pudo enviar: '+(e.message||e)); }
+}
+async function uiVerifyCode(){
+  const em=($('#cloudEmail').value||'').trim(), cd=($('#cloudCode').value||'').trim();
+  try{ await cloudVerifyCode(em,cd); CLOUD.status='idle'; renderCloud(); toast('Dispositivo conectado.'); cloudSync(); }
+  catch(e){ toast('Código incorrecto o caducado.'); }
+}
+async function uiDisconnect(){
+  if(!confirm('Desconectar este dispositivo? Tus datos siguen aquí y en la nube; solo se corta el enlace.')) return;
+  await cloudDisconnect(); renderCloud();
+}
+function showConflict(remote){
+  renderCloud();
+  const slot=$('#conflictSlot'); if(!slot) return;
+  slot.innerHTML='<div class="conflict-box"><h3>Dos versiones distintas</h3>'+
+    '<p>Este dispositivo cambió el '+fmtWhen(CLOUD.meta.lastLocalChange)+'.<br>'+
+    'La nube cambió el '+fmtWhen(remote.updated_ms)+'.<br>'+
+    'No elijo por ti. Antes de decidir, puedes exportar una copia abajo.</p>'+
+    '<div class="opt">'+
+    '<button onclick="uiResolve(\'push\')">Mandar lo de este dispositivo</button>'+
+    '<button onclick="uiResolve(\'pull\')">Traer lo de la nube</button>'+
+    '</div></div>';
+}
+async function uiResolve(which){
+  if(!confirm(which==='push'?'La versión de la nube se reemplazará por la de este dispositivo. Seguro?':'Los datos de este dispositivo se reemplazarán por los de la nube. Seguro?')) return;
+  $('#conflictSlot').innerHTML='';
+  CLOUD.meta.lastRemoteUpdatedAt = which==='pull' ? 0 : Date.now();
+  if(which==='push'){ CLOUD.meta.lastRemoteUpdatedAt=0; await cloudSync({force:'push'}); }
+  else {
+    const remote=await cloudFetchRemote();
+    if(remote){ await cloudPull(remote); renderAll(); CLOUD.status='ok'; renderCloud(); }
+  }
+}
+
+/* =================== estado de la app =================== */
+const KEY='calma-app-v1';
+const DEFAULT_STATE={
+  kitItems:[
+    {id:'tapones', name:'Tapones de espuma', desc:'Para ruido y sitios llenos. Lleva un par de repuesto.'},
+    {id:'auriculares', name:'Auriculares (cancelación / transparencia)', desc:'Transparencia si necesitas oír la calle.'},
+    {id:'fidget', name:'Fidget o piedra lisa', desc:'Sujétalo y respira lento si no puedes salir.'},
+    {id:'agua', name:'Botella de agua', desc:'Beber agua fría también baja la activación.'}
+  ],
+  kitChecks:{},
+  afterChecks:{},
+  days:{},
+  sleepItems:[
+    {id:'cerrar', name:'Cerrar el ordenador a la hora fijada', desc:'Los shaders pueden esperar a mañana. La activación mental es tu disparador.'},
+    {id:'volcado', name:'Volcado mental: 5 min en el cuaderno', desc:'La lista de mañana, en papel y específica. Sin pantallas.'},
+    {id:'manana', name:'Preparar lo de mañana', desc:'Ropa, mochila, kit sensorial. Menos decisiones al despertar.'},
+    {id:'movil', name:'Móvil al otro lado de la habitación', desc:'Con la alarma ya puesta y con volumen.'},
+    {id:'luz', name:'Luz baja y cálida', desc:'Señal de bajada para el cuerpo.'}
+  ],
+  sleepChecks:{},
+  sleep:{shutdown:''},
+  checkins:{},
+  quotes:[
+    {id:'q1', text:'El mundo no se acaba si algo se retrasa.', fav:true, mine:false},
+    {id:'q2', text:'Tienes permiso para soltar las cosas. Olvida lo que no importa y perdónate. Deja correr aquel momento incómodo de la semana pasada. La vida sigue.', fav:false, mine:false},
+    {id:'q3', text:'Las cosas mejoran. No te sientas mal porque te cueste estudiar o trabajar: irás mejorando a medida que aprendas estrategias.', fav:false, mine:false},
+    {id:'q4', text:'Perdónate por tus límites.', fav:false, mine:false},
+    {id:'q5', text:'Suelta la vergüenza: mina la motivación y solo empeora las cosas. No avergonzarías a alguien en silla de ruedas por no hacer cosas; tu dificultad está en el cerebro y no en las piernas, pero es igual de real.', fav:false, mine:false},
+    {id:'q6', text:'Deja de odiarte. No mires al futuro. No mires al pasado. Mira al presente.', fav:false, mine:false}
+  ]
+};
+const deepClone=o=>JSON.parse(JSON.stringify(o));
+let S=deepClone(DEFAULT_STATE);
+let saveT=null;
+
+async function loadState(){
+  try{
+    const r=await window.storage.get(KEY);
+    if(r && r.value){
+      const parsed=JSON.parse(r.value);
+      S=Object.assign(deepClone(DEFAULT_STATE), parsed);
+    }
+  }catch(e){ /* primer uso */ }
+  if(S.__diag){ DIAG.lastOk=S.__diag.lastOk||0; DIAG.writes=S.__diag.writes||0; }
+  migrateQuotes();
+  renderAll();
+  if(window.__storageBackend==='memoria'){
+    toast('Aviso: este navegador no permite guardar. Todo se perderá al cerrar; usa Exportar.');
+  }
+}
+let cloudT=null;
+const DIAG={backend:(window.__storageBackend||'claude'), lastOk:0, lastError:'', writes:0, fails:0};
+async function writeState(attempt){
+  const stamp=Date.now();
+  const prev=(S.__diag&&S.__diag.writes)||0;
+  S.__diag={lastOk:stamp, writes:prev+1};   // se guarda junto a los datos: sobrevive al cierre
+  try{
+    await window.storage.set(KEY, JSON.stringify(S));
+    DIAG.writes=prev+1; DIAG.lastOk=stamp; DIAG.lastError='';
+    const b=$('#saveWarn'); if(b) b.style.display='none';
+    renderDiag();
+  }catch(e){
+    DIAG.fails++;
+    DIAG.lastError=(e&&(e.message||e.name))||String(e);
+    const a=attempt||1;
+    if(a<3){ setTimeout(()=>writeState(a+1), a*1500); return; }   // reintentos: 1,5s y 3s
+    const b=$('#saveWarn');
+    if(b){ b.style.display='block'; b.textContent='No se está guardando ('+DIAG.lastError+'). Ve a Registro → Copia de seguridad y exporta antes de cerrar.'; }
+    toast('No se pudo guardar: '+DIAG.lastError);
+    renderDiag();
+  }
+}
+function save(){
+  clearTimeout(saveT);
+  markLocalChange();
+  saveT=setTimeout(()=>writeState(1), 900);   // una sola escritura, agrupando cambios seguidos
+  clearTimeout(cloudT);
+  cloudT=setTimeout(()=>{ if(CLOUD.session && navigator.onLine!==false) cloudSync(); }, 6000);
+}
+
+/* =================== utilidades =================== */
+const todayKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function vib(pattern){ if(navigator.vibrate){ try{navigator.vibrate(pattern);}catch(e){} } }
+
+/* =================== wake lock (pantalla encendida en ejercicios) =================== */
+let wakeLock=null;
+async function wlAcquire(){
+  if(!('wakeLock' in navigator)) return;
+  try{ wakeLock=await navigator.wakeLock.request('screen'); }catch(e){ wakeLock=null; }
+}
+function wlRelease(){
+  try{ if(wakeLock) wakeLock.release(); }catch(e){}
+  wakeLock=null;
+}
+function anyExerciseOpen(){
+  return $('#stepsOverlay').classList.contains('open') || $('#breathOverlay').classList.contains('open');
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible' && anyExerciseOpen()) wlAcquire();
+});
+
+/* =================== tabs =================== */
+function setTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id==='tab-'+name));
+  if(name==='registro'){ renderDiag(); renderCloud(); }
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  window.scrollTo({top:0});
+}
+function goSOS(){
+  setTab('ahora');
+  const k=todayKey();
+  S.days[k]=S.days[k]||{};
+  S.days[k].sos=true;
+  save(); renderCal();
+}
+
+/* =================== KIT =================== */
+function renderKit(){
+  const wrap=$('#kitList');
+  const checked=S.kitChecks[todayKey()]||[];
+  wrap.innerHTML='';
+  S.kitItems.forEach(item=>{
+    const done=checked.includes(item.id);
+    const row=document.createElement('button');
+    row.className='check-row'+(done?' done':'');
+    row.innerHTML=`<span class="box">${done?'✓':''}</span>
+      <span><span class="lbl">${esc(item.name)}</span><span class="sub">${esc(item.desc||'')}</span></span>
+      <span class="del" data-del="${item.id}" aria-label="Eliminar del kit">✕</span>`;
+    row.onclick=(ev)=>{
+      if(ev.target.dataset.del){ removeKitItem(ev.target.dataset.del); return; }
+      toggleKit(item.id);
+    };
+    wrap.appendChild(row);
+  });
+}
+function toggleKit(id){
+  const k=todayKey();
+  S.kitChecks[k]=S.kitChecks[k]||[];
+  const i=S.kitChecks[k].indexOf(id);
+  i>=0 ? S.kitChecks[k].splice(i,1) : S.kitChecks[k].push(id);
+  save(); renderKit();
+}
+function addKitItem(){
+  const inp=$('#kitInput');
+  const name=inp.value.trim();
+  if(!name) return;
+  S.kitItems.push({id:'x'+Date.now(), name, desc:''});
+  inp.value='';
+  save(); renderKit();
+}
+function removeKitItem(id){
+  S.kitItems=S.kitItems.filter(i=>i.id!==id);
+  save(); renderKit();
+}
+
+/* =================== FRASES =================== */
+let quoteOverride=null; // barajado manual, no persiste
+const QUOTE_FIXES={
+  q2:{old:'Tienes permiso para dejar ir las cosas. Olvida lo irrelevante y perdónate. Ignora la cosa incómoda de la semana pasada. La vida sigue.', neu:'Tienes permiso para soltar las cosas. Olvida lo que no importa y perdónate. Deja correr aquel momento incómodo de la semana pasada. La vida sigue.'},
+  q3:{old:'Las cosas mejoran. No te sientas mal por costarte el estudio o el trabajo: irás mejorando según aprendas estrategias.', neu:'Las cosas mejoran. No te sientas mal porque te cueste estudiar o trabajar: irás mejorando a medida que aprendas estrategias.'},
+  q5:{old:'Suelta la vergüenza: deprime la motivación y solo empeora las cosas. No avergonzarías a alguien en silla de ruedas por no hacer cosas; tu dificultad está en el cerebro en vez de en las piernas, pero es igual de real.', neu:'Suelta la vergüenza: mina la motivación y solo empeora las cosas. No avergonzarías a alguien en silla de ruedas por no hacer cosas; tu dificultad está en el cerebro y no en las piernas, pero es igual de real.'}
+};
+function migrateQuotes(){
+  let changed=false;
+  Object.keys(QUOTE_FIXES).forEach(id=>{
+    const q=(S.quotes||[]).find(x=>x.id===id);
+    if(q && q.text===QUOTE_FIXES[id].old){ q.text=QUOTE_FIXES[id].neu; changed=true; }
+  });
+  if(changed) save();
+}
+function quotePool(){
+  const favs=S.quotes.filter(q=>q.fav);
+  return favs.length?favs:S.quotes;
+}
+function dayQuote(){
+  const pool=quotePool();
+  if(!pool.length) return null;
+  if(quoteOverride){
+    const q=pool.find(x=>x.id===quoteOverride);
+    if(q) return q;
+    quoteOverride=null;
+  }
+  let h=0; const k=todayKey();
+  for(let i=0;i<k.length;i++) h=(h*31+k.charCodeAt(i))>>>0;
+  return pool[h%pool.length];
+}
+function shuffleQuote(){
+  const pool=quotePool();
+  if(pool.length<2){ toast('Solo hay una frase en el bote: marca más favoritas o añade frases.'); return; }
+  const cur=dayQuote();
+  let q=cur;
+  while(q.id===cur.id) q=pool[Math.floor(Math.random()*pool.length)];
+  quoteOverride=q.id;
+  renderQuotes();
+}
+function renderQuotes(){
+  const dq=dayQuote();
+  $('#dayQuote').textContent=dq?dq.text:'Añade tu primera frase abajo.';
+  const wrap=$('#quoteList');
+  wrap.innerHTML='';
+  const sorted=[...S.quotes].sort((a,b)=>(b.fav?1:0)-(a.fav?1:0));
+  sorted.forEach(q=>{
+    const row=document.createElement('div');
+    row.className='quote-row';
+    row.innerHTML=`<button class="qstar${q.fav?' on':''}" data-star="${q.id}" aria-label="${q.fav?'Quitar de favoritas':'Marcar favorita'}" aria-pressed="${q.fav}">${q.fav?'★':'☆'}</button>
+      <span class="qtext">${esc(q.text)}</span>
+      <button class="qdel" data-del="${q.id}" aria-label="Eliminar frase">✕</button>`;
+    row.querySelector('[data-star]').onclick=()=>{ const qq=S.quotes.find(x=>x.id===q.id); if(!qq) return; qq.fav=!qq.fav; quoteOverride=null; save(); renderQuotes(); };
+    row.querySelector('[data-del]').onclick=()=>{ S.quotes=S.quotes.filter(x=>x.id!==q.id); quoteOverride=null; save(); renderQuotes(); };
+    wrap.appendChild(row);
+  });
+}
+function addQuote(){
+  const inp=$('#quoteInput');
+  const text=inp.value.trim();
+  if(!text) return;
+  S.quotes.push({id:'q'+Date.now(), text, fav:false, mine:true});
+  inp.value='';
+  save(); renderQuotes();
+}
+
+/* =================== SUEÑO =================== */
+const SLEEP_TECH=[
+  {ok:true, t:'Volcado mental antes de dormir', x:'Escribir 5 minutos la lista de mañana redujo el tiempo en dormirse de 25 a 16 minutos en un estudio con polisomnografía (Baylor, 2018). Cuanto más específica la lista, antes llega el sueño. En papel: el cuaderno junto a la cama.'},
+  {ok:true, t:'Luz de amanecer programada', x:'Lámparas que se encienden gradualmente antes de la alarma aumentan el cortisol del despertar y reducen la inercia del sueño: despiertas con menos atontamiento y menos estrés (Thorn et al., 2004; estudios posteriores).'},
+  {ok:true, t:'Dormitorio fresco', x:'Recomendación médica: 15,6–20 °C, óptimo alrededor de 18 °C (Sleep Foundation, Cleveland Clinic). El calor reduce el sueño profundo y aumenta los despertares.'},
+  {ok:true, t:'Nada activo en pantallas 30 min antes', x:'Restringir el uso del móvil 30 minutos antes de dormir mejoró el tiempo en dormirse, la duración y la calidad en un ensayo aleatorizado (PLoS One, 2020). El daño viene de la activación: en tu caso, el ordenador con shaders.'},
+  {ok:false, t:'Móvil al otro lado de la habitación', x:'Te obliga a levantarte para apagar la alarma y evita el scroll en la cama. Variante: temporizador de 5 minutos con el móvil lejos para forzar la salida de la cama.'},
+  {ok:false, t:'Dos alarmas al despertar', x:'Una temprana para la medicación (y volver a la cama) y otra para levantarte, cuando ya empieza a hacer efecto.'},
+  {ok:false, t:'Compromisos temprano por la mañana', x:'Quedar con alguien o tener algo fijado te saca de la cama porque el compromiso es con otra persona, no contigo.'},
+  {ok:false, t:'Calor al despertar', x:'Subir la temperatura media hora antes de la alarma. La parte de dormir fresco sí está estudiada; esta mitad es experiencia de la comunidad.'}
+];
+function renderSleep(){
+  const wrap=$('#sleepList');
+  const checked=S.sleepChecks[todayKey()]||[];
+  wrap.innerHTML='';
+  S.sleepItems.forEach(item=>{
+    const done=checked.includes(item.id);
+    const row=document.createElement('button');
+    row.className='check-row'+(done?' done':'');
+    row.innerHTML=`<span class="box">${done?'✓':''}</span>
+      <span><span class="lbl">${esc(item.name)}</span><span class="sub">${esc(item.desc||'')}</span></span>
+      <span class="del" data-del="${item.id}" aria-label="Eliminar paso">✕</span>`;
+    row.onclick=(ev)=>{
+      if(ev.target.dataset.del){ S.sleepItems=S.sleepItems.filter(i=>i.id!==ev.target.dataset.del); save(); renderSleep(); return; }
+      const k=todayKey();
+      S.sleepChecks[k]=S.sleepChecks[k]||[];
+      const i=S.sleepChecks[k].indexOf(item.id);
+      i>=0 ? S.sleepChecks[k].splice(i,1) : S.sleepChecks[k].push(item.id);
+      save(); renderSleep();
+    };
+    wrap.appendChild(row);
+  });
+  const tech=$('#sleepTech');
+  tech.innerHTML='';
+  SLEEP_TECH.forEach(tc=>{
+    const c=document.createElement('div');
+    c.className='card';
+    c.innerHTML='<span class="pill '+(tc.ok?'teal':'amber')+'">'+(tc.ok?'🟢 Respaldado':'🟡 Comunidad')+'</span>'+
+      '<h3>'+tc.t+'</h3><p>'+tc.x+'</p>';
+    tech.appendChild(c);
+  });
+  const st=$('#shutdownTime');
+  if(st) st.value=(S.sleep&&S.sleep.shutdown)||'';
+}
+function addSleepItem(){
+  const inp=$('#sleepInput');
+  const name=inp.value.trim();
+  if(!name) return;
+  S.sleepItems.push({id:'s'+Date.now(), name, desc:''});
+  inp.value='';
+  save(); renderSleep();
+}
+function setShutdown(v){
+  S.sleep=S.sleep||{shutdown:''};
+  S.sleep.shutdown=v;
+  save();
+  toast(v?('Hora de cierre fijada: '+v+'. Ponla también como alarma en el móvil.'):'Hora de cierre borrada.');
+}
+
+/* =================== DESPUÉS =================== */
+const AFTER=[
+  {id:'espacio', t:'Estoy en un espacio tranquilo', s:'Poca luz, poco ruido. Vale una habitación a oscuras.'},
+  {id:'agua', t:'He bebido agua', s:'Tu cuerpo acaba de gastar mucho.'},
+  {id:'comida', t:'He comido algo suave', s:'Sin obligación de comida "de verdad".'},
+  {id:'presion', t:'Tacto que reconforta', s:'Manta con peso, chaqueta, algo con textura.'},
+  {id:'descanso', t:'Me he dado permiso para descansar', s:'Sin pantalla de exigencias. Sin volver "ya" a la normalidad.'}
+];
+function renderAfter(){
+  const wrap=$('#afterList');
+  const checked=S.afterChecks[todayKey()]||[];
+  wrap.innerHTML='';
+  AFTER.forEach(item=>{
+    const done=checked.includes(item.id);
+    const row=document.createElement('button');
+    row.className='check-row'+(done?' done':'');
+    row.innerHTML=`<span class="box">${done?'✓':''}</span>
+      <span><span class="lbl">${item.t}</span><span class="sub">${item.s}</span></span>`;
+    row.onclick=()=>{
+      const k=todayKey();
+      S.afterChecks[k]=S.afterChecks[k]||[];
+      const i=S.afterChecks[k].indexOf(item.id);
+      i>=0 ? S.afterChecks[k].splice(i,1) : S.afterChecks[k].push(item.id);
+      save(); renderAfter();
+    };
+    wrap.appendChild(row);
+  });
+}
+
+/* =================== step-through =================== */
+const FLOWS={
+  tipp:{title:'TIPP', steps:[
+    {ico:'🧊', t:'Temperatura', x:'Agua fría en la cara o en las muñecas, 30 segundos. Frena la activación por vía directa.', timer:30},
+    {ico:'🏃', t:'Intensidad', x:'1 o 2 minutos de movimiento fuerte: sentadillas, subir escaleras, caminar rápido.', timer:60},
+    {ico:'🫁', t:'Pausar la respiración', x:'Respira lento. Que la exhalación dure más que la inhalación: 4 dentro, 6 fuera.', timer:45},
+    {ico:'💪', t:'Progresiva', x:'Tensa los puños 5 segundos. Suelta de golpe. Nota la diferencia. Repite con hombros.', timer:30},
+    {ico:'✅', t:'Hecho', x:'Has trabajado con tu biología, no contra ella. Revisa cómo estás ahora.'}
+  ]},
+  stop:{title:'STOP', steps:[
+    {ico:'✋', t:'Para', x:'No hagas nada todavía. Ni responder, ni decidir, ni enviar.'},
+    {ico:'👣', t:'Da un paso atrás', x:'Físico o mental. Suelta el móvil, apártate, respira una vez.'},
+    {ico:'👀', t:'Observa', x:'¿Qué está pasando fuera? ¿Y dentro de ti? Solo mirar, sin juzgar.'},
+    {ico:'🧭', t:'Procede con cuidado', x:'Ahora sí: ¿qué acción va a favor de lo que te importa?'}
+  ]},
+  nombrar:{title:'Nómbralo', steps:[
+    {ico:'🏷️', t:'Di lo que pasa', x:'En voz alta o por escrito: "Estoy rumiando. Estoy ansioso por no empezar." Nombrar la emoción baja su intensidad.'},
+    {ico:'🎡', t:'Afina la palabra', x:'Si "ansioso" se queda corto, abre tu rueda de emociones y busca la palabra exacta. Precisión = control.'},
+    {ico:'🤝', t:'Sepárate del bucle', x:'"Tengo un pensamiento que dice que soy un desastre" no es lo mismo que "soy un desastre". Es un pensamiento, no un hecho.'}
+  ]},
+  cuerpo:{title:'Mueve el cuerpo', steps:[
+    {ico:'🧍', t:'Levántate', x:'Del escritorio, del sofá, de donde estés atascado. Cambiar de postura ya rompe algo.'},
+    {ico:'🚶', t:'2 minutos de movimiento', x:'Camina por casa, estírate o sal al balcón o a la calle. Descarga la estimulación acumulada.', timer:120},
+    {ico:'💧', t:'Agua', x:'Bebe un vaso. Si sigues acelerado, agua fría en las muñecas.'}
+  ]},
+  micro:{title:'Micro-inicio', steps:[
+    {ico:'🎯', t:'Elige UNA cosa diminuta', x:'No "estudiar". Algo ridículamente pequeño: abrir el archivo, leer un párrafo, escribir una línea.'},
+    {ico:'⏱️', t:'Solo 5 minutos', x:'Ese es el trato completo. A los 5 minutos tienes permiso total para parar.', timer:300},
+    {ico:'🔁', t:'Al acabar, decide', x:'¿Sigo 5 más o paro? Las dos respuestas son victoria: el bucle ya está roto porque has empezado.'}
+  ]},
+  pmr:{title:'Relajación muscular', steps:[
+    {ico:'✊', t:'Manos y brazos', x:'Aprieta los puños y tensa los brazos 5 segundos… y suelta de golpe. Nota cómo pesa la relajación.', timer:15},
+    {ico:'🙆', t:'Hombros y cuello', x:'Sube los hombros hacia las orejas 5 segundos… y déjalos caer.', timer:15},
+    {ico:'😬', t:'Cara', x:'Arruga toda la cara, cierra fuerte los ojos 5 segundos… y afloja. Mandíbula suelta, dientes separados.', timer:15},
+    {ico:'🫃', t:'Tronco', x:'Tensa abdomen y espalda 5 segundos… y suelta soltando también el aire.', timer:15},
+    {ico:'🦵', t:'Piernas y pies', x:'Tensa muslos, gemelos y dedos de los pies 5 segundos… y suelta.', timer:15},
+    {ico:'🌊', t:'Todo el cuerpo', x:'Un repaso mental de pies a cabeza. Donde quede tensión, exhala hacia ahí.'}
+  ]},
+  hechos:{title:'Comprobar los hechos', steps:[
+    {ico:'❓', t:'¿Qué dice el pensamiento?', x:'Escríbelo tal cual: "Nunca voy a aprobar", "he perdido el día entero".'},
+    {ico:'⚖️', t:'¿Qué es literalmente cierto?', x:'¿"Nunca"? ¿"Entero"? La rumiación exagera con palabras absolutas. ¿Cuál es el dato real, con números?'},
+    {ico:'🔄', t:'Reescribe con los hechos', x:'"Hoy llevo 2 horas sin estudiar y me quedan 3 disponibles" es un problema con solución. "Soy un desastre" no lo es.'},
+    {ico:'🎯', t:'Un paso siguiente', x:'Con los hechos delante, ¿cuál es la acción más pequeña posible? (Pista: pestaña Micro-inicio.)'}
+  ]}
+};
+let flow=null, stepIdx=0, stepInterval=null;
+
+function openSteps(id){
+  flow=FLOWS[id]; stepIdx=0;
+  wlAcquire();
+  $('#stepsTitle').textContent=flow.title;
+  $('#stepsOverlay').classList.add('open');
+  renderStep();
+}
+function closeSteps(){
+  $('#stepsOverlay').classList.remove('open');
+  clearInterval(stepInterval);
+  if(!anyExerciseOpen()) wlRelease();
+}
+function stepMove(dir){
+  clearInterval(stepInterval);
+  stepIdx+=dir;
+  if(stepIdx<0) stepIdx=0;
+  if(stepIdx>=flow.steps.length){ closeSteps(); return; }
+  renderStep();
+}
+function renderStep(){
+  const s=flow.steps[stepIdx];
+  $('#stepCount').textContent=(stepIdx+1)+' / '+flow.steps.length;
+  $('#stepIco').textContent=s.ico;
+  $('#stepTitle').textContent=s.t;
+  $('#stepText').textContent=s.x;
+  $('#stepBack').style.visibility=stepIdx===0?'hidden':'visible';
+  $('#stepNext').textContent=(stepIdx===flow.steps.length-1)?'Terminar':'Siguiente';
+  const timerEl=$('#stepTimer');
+  clearInterval(stepInterval);
+  if(s.timer){
+    let left=s.timer;
+    timerEl.style.display='block';
+    timerEl.textContent=fmtT(left);
+    stepInterval=setInterval(()=>{
+      left--;
+      timerEl.textContent=left>0?fmtT(left):'✓ listo';
+      if(left<=0){ clearInterval(stepInterval); vib([40,80,40]); }
+    },1000);
+  }else{
+    timerEl.style.display='none';
+  }
+}
+const fmtT=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+
+/* =================== respiración 4-7-8 (con vibración) =================== */
+const PHASES=[
+  {label:'Inhala por la nariz', secs:4, scale:1, vib:[40]},
+  {label:'Aguanta', secs:7, scale:1, vib:[40,60,40]},
+  {label:'Exhala por la boca', secs:8, scale:.7, vib:[90]}
+];
+let brRunning=false, brTimer=null, brPhase=0, brLeft=0, brCycles=0;
+
+function openBreath(){
+  $('#breathOverlay').classList.add('open');
+  wlAcquire();
+  $('#breathVibNote').textContent=navigator.vibrate?'El móvil vibra al cambiar de fase: puedes cerrar los ojos.':'';
+  resetBreath();
+}
+function closeBreath(){
+  $('#breathOverlay').classList.remove('open');
+  stopBreath();
+  if(!anyExerciseOpen()) wlRelease();
+}
+function resetBreath(){
+  stopBreath();
+  brCycles=0;
+  $('#breathPhase').textContent='Cuando quieras, pulsa empezar';
+  $('#breathCount').textContent='';
+  $('#breathCycles').textContent='';
+  $('#breathCircle').style.transform='scale(.7)';
+  $('#breathBtn').textContent='Empezar';
+}
+function toggleBreath(){ brRunning?resetBreath():startBreath(); }
+function startBreath(){
+  brRunning=true; brPhase=0;
+  $('#breathBtn').textContent='Parar';
+  runPhase();
+}
+function stopBreath(){ brRunning=false; clearInterval(brTimer); }
+function runPhase(){
+  if(!brRunning) return;
+  const p=PHASES[brPhase];
+  brLeft=p.secs;
+  vib(p.vib);
+  const circ=$('#breathCircle');
+  circ.style.transition='transform '+p.secs+'s linear';
+  circ.style.transform='scale('+p.scale+')';
+  $('#breathPhase').textContent=p.label;
+  $('#breathCount').textContent=brLeft;
+  clearInterval(brTimer);
+  brTimer=setInterval(()=>{
+    brLeft--;
+    if(brLeft>0){
+      $('#breathCount').textContent=brLeft;
+    }else{
+      clearInterval(brTimer);
+      brPhase=(brPhase+1)%PHASES.length;
+      if(brPhase===0){
+        brCycles++;
+        $('#breathCycles').textContent='Ciclos completados: '+brCycles;
+      }
+      runPhase();
+    }
+  },1000);
+}
+
+/* =================== chequeos programados =================== */
+const SLOTS=[
+  {id:'m', ico:'🌅', t:'Mañana'},
+  {id:'t', ico:'☀️', t:'Tarde'},
+  {id:'n', ico:'🌙', t:'Noche'}
+];
+function renderSlots(){
+  const wrap=$('#slotCheck');
+  if(!wrap) return;
+  const done=S.checkins[todayKey()]||[];
+  wrap.innerHTML='';
+  SLOTS.forEach(sl=>{
+    const b=document.createElement('button');
+    b.className=done.includes(sl.id)?'on':'';
+    b.setAttribute('aria-pressed', done.includes(sl.id)?'true':'false');
+    b.innerHTML='<span class="ico">'+sl.ico+'</span>'+sl.t+(done.includes(sl.id)?' ✓':'');
+    b.onclick=()=>{
+      const k=todayKey();
+      S.checkins[k]=S.checkins[k]||[];
+      const i=S.checkins[k].indexOf(sl.id);
+      i>=0 ? S.checkins[k].splice(i,1) : S.checkins[k].push(sl.id);
+      save(); renderSlots(); renderCal();
+    };
+    wrap.appendChild(b);
+  });
+}
+
+/* =================== interocepción =================== */
+const BODY=[
+  {id:'hambre', ico:'🍽️', t:'Hambre', fix:'Come algo, aunque sea pequeño.'},
+  {id:'sed', ico:'💧', t:'Sed', fix:'Un vaso de agua ahora.'},
+  {id:'bano', ico:'🚻', t:'Baño', fix:'Ve ya. En serio.'},
+  {id:'calor', ico:'🌡️', t:'Calor o frío', fix:'Quita o ponte una capa; la temperatura desregula.'},
+  {id:'tension', ico:'🪨', t:'Tensión muscular', fix:'Relajación muscular (pestaña Bucle) o estírate 1 minuto.'},
+  {id:'cansancio', ico:'🥱', t:'Cansancio', fix:'Pausa real de 10 minutos sin pantalla, o siesta corta.'}
+];
+let bodyOn=new Set();
+function renderBody(){
+  const wrap=$('#bodyCheck');
+  wrap.innerHTML='';
+  BODY.forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className=bodyOn.has(b.id)?'on':'';
+    btn.innerHTML='<span class="ico">'+b.ico+'</span>'+b.t;
+    btn.onclick=()=>{
+      bodyOn.has(b.id)?bodyOn.delete(b.id):bodyOn.add(b.id);
+      renderBody();
+    };
+    wrap.appendChild(btn);
+  });
+  const res=$('#bodyResult');
+  if(bodyOn.size===0){
+    res.style.display='none';
+  }else{
+    res.style.display='block';
+    res.innerHTML='<h3 style="margin-bottom:6px;">Antes de nada:</h3><p>'+
+      BODY.filter(b=>bodyOn.has(b.id)).map(b=>'• '+b.fix).join('<br>')+
+      '</p>';
+  }
+}
+
+/* =================== calendario =================== */
+const MOOD_DEFS=[
+  {id:'calm',  em:'😌', label:'Tranquilo'},
+  {id:'anx',   em:'😟', label:'Ansioso'},
+  {id:'tense', em:'😬', label:'Tenso'},
+  {id:'storm', em:'🌩️', label:'Sobrecarga'}
+];
+const MOOD_ICO=Object.fromEntries(MOOD_DEFS.map(m=>[m.id,m.em]));
+let calDate=new Date();
+let pickKey=null;
+
+function calMove(dir){
+  calDate.setMonth(calDate.getMonth()+dir);
+  renderCal();
+}
+function renderCal(){
+  const y=calDate.getFullYear(), m=calDate.getMonth();
+  $('#calTitle').textContent=calDate.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+  const grid=$('#calGrid');
+  grid.innerHTML='';
+  ['L','M','X','J','V','S','D'].forEach(d=>{
+    const el=document.createElement('div');
+    el.className='dow'; el.textContent=d;
+    grid.appendChild(el);
+  });
+  const first=new Date(y,m,1);
+  let offset=(first.getDay()+6)%7;
+  for(let i=0;i<offset;i++){
+    const el=document.createElement('div');
+    el.className='cal-day empty';
+    grid.appendChild(el);
+  }
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const tk=todayKey();
+  const counts={calm:0,anx:0,tense:0,storm:0,sos:0,checks:0};
+  for(let d=1; d<=daysInMonth; d++){
+    const key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const rec=S.days[key]||{};
+    if(rec.mood && counts[rec.mood]!==undefined) counts[rec.mood]++;
+    if(rec.sos) counts.sos++;
+    counts.checks+=(S.checkins[key]||[]).length;
+    const el=document.createElement('button');
+    el.className='cal-day'+(key===tk?' today':'')+(rec.mood?' mood-'+rec.mood:'');
+    el.setAttribute('aria-label','Día '+d);
+    const ck=S.checkins[key]||[];
+    el.innerHTML=(rec.mood&&MOOD_ICO[rec.mood]?'<span class="mood">'+MOOD_ICO[rec.mood]+'</span>':'')+
+      '<span>'+d+'</span>'+
+      (rec.sos?'<span class="sos-dot"></span>':'')+
+      (rec.note?'<span class="note-dot"></span>':'')+
+      '<span class="cal-checks">'+['m','t','n'].map(x=>'<i class="'+(ck.includes(x)?'on':'')+'"></i>').join('')+'</span>';
+    el.onclick=()=>openMoodPick(key, d);
+    grid.appendChild(el);
+  }
+  const parts=MOOD_DEFS
+    .filter(md=>counts[md.id]>0)
+    .map(md=>md.em+' <b>'+counts[md.id]+'</b>');
+  if(counts.sos>0) parts.push('<span style="color:var(--coral)">SOS</span> <b>'+counts.sos+'</b>');
+  if(counts.checks>0) parts.push('🫀 <b>'+counts.checks+'</b> chequeos');
+  $('#calSummary').innerHTML=parts.length?parts.join(' '):'<span style="color:var(--faint)">Sin registros este mes.</span>';
+}
+function openMoodPick(key, dayNum){
+  pickKey=key;
+  const rec=S.days[key]||{};
+  $('#moodPickTitle').textContent='Día '+dayNum+' — ¿cómo fue?';
+  const opts=$('#moodOpts');
+  opts.innerHTML='';
+  MOOD_DEFS.forEach(md=>{
+    const b=document.createElement('button');
+    b.className=rec.mood===md.id?'sel':'';
+    b.innerHTML='<span class="em">'+md.em+'</span>'+md.label;
+    b.onclick=()=>setMood(md.id);
+    opts.appendChild(b);
+  });
+  const clr=document.createElement('button');
+  clr.className='clear';
+  clr.textContent='Borrar registro';
+  clr.onclick=()=>setMood(null);
+  opts.appendChild(clr);
+  $('#dayNote').value=rec.note||'';
+  $('#moodPick').classList.add('open');
+}
+function closeMoodPick(){ $('#moodPick').classList.remove('open'); pickKey=null; }
+function setMood(mood){
+  if(!pickKey) return;
+  S.days[pickKey]=S.days[pickKey]||{};
+  if(mood===null){
+    delete S.days[pickKey].mood;
+    delete S.days[pickKey].note;
+    if(!S.days[pickKey].sos) delete S.days[pickKey];
+  }else{
+    S.days[pickKey].mood=mood;
+    applyNote();
+  }
+  save(); renderCal(); closeMoodPick();
+}
+function applyNote(){
+  const note=$('#dayNote').value.trim();
+  if(note) S.days[pickKey].note=note;
+  else delete S.days[pickKey].note;
+}
+function saveDayNote(){
+  if(!pickKey) return;
+  S.days[pickKey]=S.days[pickKey]||{};
+  applyNote();
+  if(!S.days[pickKey].mood && !S.days[pickKey].note && !S.days[pickKey].sos) delete S.days[pickKey];
+  save(); renderCal(); closeMoodPick();
+}
+
+/* =================== copia de seguridad =================== */
+function genBackup(){
+  const payload={app:'calma', v:5, exported:new Date().toISOString(), state:S, theme:THEME};
+  $('#backupTA').value=JSON.stringify(payload);
+  toast('Copia generada. Cópiala y guárdala donde quieras.');
+}
+async function copyBackup(){
+  const ta=$('#backupTA');
+  if(!ta.value){ toast('Primero pulsa "Generar copia".'); return; }
+  ta.select(); ta.setSelectionRange(0, ta.value.length);
+  let ok=false;
+  try{ await navigator.clipboard.writeText(ta.value); ok=true; }catch(e){
+    try{ ok=document.execCommand('copy'); }catch(e2){}
+  }
+  toast(ok?'Copiado al portapapeles.':'No pude copiar solo. El texto queda seleccionado: mantén pulsado para copiar.');
+}
+function importBackup(){
+  const raw=$('#backupTA').value.trim();
+  if(!raw){ toast('Pega primero una copia en el cuadro.'); return; }
+  let o;
+  try{ o=JSON.parse(raw); }catch(e){ toast('Eso no es una copia válida (JSON incorrecto).'); return; }
+  if(!o || o.app!=='calma' || !o.state){ toast('Eso no parece una copia de esta app.'); return; }
+  if(!confirm('Importar reemplaza TODOS los datos actuales por los de la copia. ¿Continuar?')) return;
+  S=Object.assign(deepClone(DEFAULT_STATE), o.state);
+  migrateQuotes();
+  if(o.theme){
+    if(o.theme.mode==='dark'||o.theme.mode==='light'||o.theme.mode==='auto')THEME.mode=o.theme.mode;
+    if(o.theme.dark&&normHex(o.theme.dark))THEME.dark=normHex(o.theme.dark);
+    if(o.theme.light&&normHex(o.theme.light))THEME.light=normHex(o.theme.light);
+    THEME.hc=!!o.theme.hc;
+    if(o.theme.ts&&TS_STEPS.indexOf(o.theme.ts)>=0)THEME.ts=o.theme.ts;
+    saveTheme(); applyTheme();
+  }
+  save(); renderAll();
+  toast('Copia importada.');
+}
+
+/* =================== init =================== */
+function renderAll(){
+  renderDiag();
+  renderCloud();
+  renderKit(); renderAfter(); renderBody(); renderSlots(); renderCal(); renderSleep(); renderQuotes();
+}
+$('#todayLabel').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long', day:'numeric', month:'long'});
+$('#kitInput').addEventListener('keydown',e=>{if(e.key==='Enter')addKitItem();});
+$('#sleepInput').addEventListener('keydown',e=>{if(e.key==='Enter')addSleepItem();});
+$('#quoteInput').addEventListener('keydown',e=>{if(e.key==='Enter')addQuote();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ closeMoodPick(); $('#themePop').classList.add('hidden'); }
+});
+setTab('kit');
+loadTheme().then(applyTheme);
+loadState().then(()=>cloudInit());
+window.addEventListener('online',()=>{ if(CLOUD.session) cloudSync(); });
+</script>
+</body>
+</html>
