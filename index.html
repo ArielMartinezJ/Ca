@@ -247,6 +247,7 @@ html.light .btn.warm{color:#fff;}
 #breathCount{font-size:2.4rem;color:var(--teal);}
 #breathCycles{color:var(--muted);font-size:.8rem;}
 .breath-note{color:var(--faint);font-size:.75rem;}
+.ver{margin:-8px 0 14px;color:var(--faint);font-size:.68rem;font-family:var(--mono);letter-spacing:.02em;}
 
 /* ---------- checklists ---------- */
 .check-row{
@@ -378,6 +379,9 @@ html.light .check-row.done .box{color:#fff;}
       <div id="themePop" class="hidden"></div>
     </div>
   </header>
+  <div class="ver" id="verFoot">
+    <span id="verApp">Calma v16</span> · <span id="verCache">caché: comprobando…</span>
+  </div>
 
   <!-- ============ AHORA ============ -->
   <section class="tab-panel" id="tab-ahora">
@@ -1040,7 +1044,7 @@ function renderCloud(){
     el.innerHTML='<h3>Conectar este dispositivo</h3>'+
       '<p>Entra con tu correo y contraseña. La primera vez, pulsa «Crear cuenta»; en los demás dispositivos, «Entrar» con los mismos datos.</p>'+
       '<div class="cloud-form"><input id="cloudEmail" type="email" inputmode="email" autocomplete="username" placeholder="tu correo" aria-label="Correo"></div>'+
-      '<div class="cloud-form"><input id="cloudPass" type="password" autocomplete="current-password" placeholder="contraseña (mínimo 6)" aria-label="Contraseña"></div>'+
+      '<div class="cloud-form"><input id="cloudPass" type="password" autocomplete="current-password" placeholder="contraseña (mínimo 6)" aria-label="Contraseña"><button id="cloudEye" onclick="uiTogglePass()" aria-label="Mostrar u ocultar la contraseña" title="Mostrar u ocultar">Ver</button></div>'+
       '<div class="bk-row" style="margin-top:10px;"><button class="accent" onclick="uiLogin()">Entrar</button><button onclick="uiSignup()">Crear cuenta</button></div>';
     return;
   }
@@ -1050,6 +1054,13 @@ function renderCloud(){
     '<p>Cuenta: <span class="mono">'+esc(CLOUD.session.email||'')+'</span><br>Última sincronización: '+fmtWhen(CLOUD.meta.lastSyncedAt)+'</p>'+
     '<div class="bk-row" style="margin-top:10px;"><button class="accent" onclick="cloudSync()">Sincronizar ahora</button><button onclick="uiDisconnect()">Desconectar</button></div>'+
     '<div id="conflictSlot"></div>';
+}
+function uiTogglePass(){
+  const i=$('#cloudPass'), b=$('#cloudEye'); if(!i||!b) return;
+  const shown = i.type==='text';
+  i.type = shown ? 'password' : 'text';
+  b.textContent = shown ? 'Ver' : 'Ocultar';
+  i.focus();
 }
 function cloudCreds(){
   const em=($('#cloudEmail').value||'').trim(), pw=$('#cloudPass').value||'';
@@ -1777,6 +1788,25 @@ $('#quoteInput').addEventListener('keydown',e=>{if(e.key==='Enter')addQuote();})
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){ closeMoodPick(); $('#themePop').classList.add('hidden'); }
 });
+/* ---------- pie de versión (diagnóstico de caché) ----------
+   APP_VERSION vive en el HTML; el nombre de la caché lo dice el navegador.
+   Si no coinciden los números, el dispositivo está sirviendo una versión
+   antigua guardada: hay que cerrar la app del todo y abrirla dos veces. */
+const APP_VERSION = 'v16';
+async function renderVersion(){
+  const a=$('#verApp'), c=$('#verCache'); if(!a||!c) return;
+  a.textContent = 'Calma ' + APP_VERSION;
+  if(!('caches' in window)){ c.textContent = 'caché: no aplica'; return; }
+  try{
+    const keys = await caches.keys();
+    const mine = keys.filter(k=>k.indexOf('calma-cache-')===0);
+    if(!mine.length){ c.textContent = 'caché: ninguna'; return; }
+    const num = mine[0].replace('calma-cache-','');
+    c.textContent = 'caché: ' + num;
+    if(num !== APP_VERSION) c.textContent += ' ⚠ desajuste';
+  }catch(e){ c.textContent = 'caché: no se pudo leer'; }
+}
+renderVersion();
 setTab('kit');
 loadTheme().then(applyTheme);
 loadState().then(()=>cloudInit());
