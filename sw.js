@@ -1,7 +1,7 @@
 /* Service worker de Calma — cache primero, con actualización en segundo plano.
    IMPORTANTE: al subir una versión nueva de la app, cambia el número de CACHE
-   (calma-cache-v12 → v9…) para que los usuarios reciban los archivos nuevos. */
-const CACHE = 'calma-cache-v12';
+   (calma-cache-v13 → v9…) para que los usuarios reciban los archivos nuevos. */
+const CACHE = 'calma-cache-v13';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {

@@ -850,8 +850,8 @@ document.addEventListener('click',function(e){
    getState() / setState() que cada app define abajo del módulo.
    ============================================================ */
 const CLOUD_CFG = {
-  url:     '',          // ← pega aquí tu Project URL de Supabase
-  anonKey: '',          // ← pega aquí tu clave anon/public
+  url:     'https://tyfqmnfcmbljfginqebc.supabase.co/rest/v1/',          // ← pega aquí tu Project URL de Supabase
+  anonKey: 'sb_publishable_ZnVZTzFrOf7q72AAWSqdNw_AbUa5wze',          // ← pega aquí tu clave anon/public
   appId:   'calma'      // ← identificador ÚNICO de esta app
 };
 
@@ -896,14 +896,23 @@ async function refreshSession(){
   }catch(e){ return false; }
 }
 
-/* ---------- autenticación por código de 6 dígitos (sin contraseña) ---------- */
-async function cloudSendCode(email){
-  await api('/auth/v1/otp', {method:'POST', noAuth:true, body:{email:email, create_user:true}});
-}
-async function cloudVerifyCode(email, code){
-  const d = await api('/auth/v1/verify', {method:'POST', noAuth:true, body:{email:email, token:code, type:'email'}});
+/* ---------- autenticación por correo y contraseña ----------
+   Se cambió el acceso por código de 6 dígitos (v12) por correo + contraseña:
+   los proyectos nuevos de plan gratuito de Supabase no pueden editar las
+   plantillas de correo, y sin eso el código nunca llega. Este flujo no
+   envía ningún correo. Requiere "Confirm email" desactivado en Supabase. */
+async function saveSession(d, email){
+  if(!d || !d.access_token) throw new Error('Supabase no devolvió sesión. Revisa que "Confirm email" esté desactivado.');
   CLOUD.session = {access_token:d.access_token, refresh_token:d.refresh_token, email:(d.user&&d.user.email)||email, user_id:d.user&&d.user.id};
   await window.storage.set(SESS_KEY, JSON.stringify(CLOUD.session));
+}
+async function cloudSignUp(email, password){
+  const d = await api('/auth/v1/signup', {method:'POST', noAuth:true, body:{email:email, password:password}});
+  await saveSession(d, email);
+}
+async function cloudSignIn(email, password){
+  const d = await api('/auth/v1/token?grant_type=password', {method:'POST', noAuth:true, body:{email:email, password:password}});
+  await saveSession(d, email);
 }
 async function cloudDisconnect(){
   CLOUD.session=null; CLOUD.status='off';
@@ -1029,9 +1038,10 @@ function renderCloud(){
   }
   if(!CLOUD.session){
     el.innerHTML='<h3>Conectar este dispositivo</h3>'+
-      '<p>Te enviamos un código de 6 dígitos por correo. Sin contraseñas.</p>'+
-      '<div class="cloud-form"><input id="cloudEmail" type="email" inputmode="email" placeholder="tu correo" aria-label="Correo"><button onclick="uiSendCode()">Enviar código</button></div>'+
-      '<div class="cloud-form" id="codeRow" style="display:none;"><input id="cloudCode" type="text" inputmode="numeric" maxlength="8" placeholder="código de 6 dígitos" aria-label="Código"><button onclick="uiVerifyCode()">Entrar</button></div>';
+      '<p>Entra con tu correo y contraseña. La primera vez, pulsa «Crear cuenta»; en los demás dispositivos, «Entrar» con los mismos datos.</p>'+
+      '<div class="cloud-form"><input id="cloudEmail" type="email" inputmode="email" autocomplete="username" placeholder="tu correo" aria-label="Correo"></div>'+
+      '<div class="cloud-form"><input id="cloudPass" type="password" autocomplete="current-password" placeholder="contraseña (mínimo 6)" aria-label="Contraseña"></div>'+
+      '<div class="bk-row" style="margin-top:10px;"><button class="accent" onclick="uiLogin()">Entrar</button><button onclick="uiSignup()">Crear cuenta</button></div>';
     return;
   }
   const st=CLOUD.status;
@@ -1041,16 +1051,21 @@ function renderCloud(){
     '<div class="bk-row" style="margin-top:10px;"><button class="accent" onclick="cloudSync()">Sincronizar ahora</button><button onclick="uiDisconnect()">Desconectar</button></div>'+
     '<div id="conflictSlot"></div>';
 }
-async function uiSendCode(){
-  const em=($('#cloudEmail').value||'').trim();
-  if(!em){ toast('Escribe tu correo.'); return; }
-  try{ await cloudSendCode(em); $('#codeRow').style.display='flex'; toast('Código enviado. Míralo en tu correo.'); }
-  catch(e){ toast('No se pudo enviar: '+(e.message||e)); }
+function cloudCreds(){
+  const em=($('#cloudEmail').value||'').trim(), pw=$('#cloudPass').value||'';
+  if(!em){ toast('Escribe tu correo.'); return null; }
+  if(pw.length<6){ toast('La contraseña necesita al menos 6 caracteres.'); return null; }
+  return {em:em, pw:pw};
 }
-async function uiVerifyCode(){
-  const em=($('#cloudEmail').value||'').trim(), cd=($('#cloudCode').value||'').trim();
-  try{ await cloudVerifyCode(em,cd); CLOUD.status='idle'; renderCloud(); toast('Dispositivo conectado.'); cloudSync(); }
-  catch(e){ toast('Código incorrecto o caducado.'); }
+async function uiLogin(){
+  const c=cloudCreds(); if(!c) return;
+  try{ await cloudSignIn(c.em,c.pw); CLOUD.status='idle'; renderCloud(); toast('Dispositivo conectado.'); cloudSync(); }
+  catch(e){ toast('No se pudo entrar: '+(e.message||e)); }
+}
+async function uiSignup(){
+  const c=cloudCreds(); if(!c) return;
+  try{ await cloudSignUp(c.em,c.pw); CLOUD.status='idle'; renderCloud(); toast('Cuenta creada y dispositivo conectado.'); cloudSync(); }
+  catch(e){ toast('No se pudo crear la cuenta: '+(e.message||e)); }
 }
 async function uiDisconnect(){
   if(!confirm('Desconectar este dispositivo? Tus datos siguen aquí y en la nube; solo se corta el enlace.')) return;
