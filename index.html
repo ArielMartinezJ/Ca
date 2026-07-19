@@ -493,7 +493,7 @@ html.light .check-row.done .box{color:#fff;}
     </div>
   </header>
   <div class="ver" id="verFoot">
-    <span id="verApp">Calma v36</span> · <span id="verCache">caché: comprobando…</span>
+    <span id="verApp">Calma v37</span> · <span id="verCache">caché: comprobando…</span>
   </div>
 
   <!-- ============ AHORA ============ -->
@@ -798,7 +798,7 @@ html.light .check-row.done .box{color:#fff;}
    por la URL, asi que sw.js ya no lleva el numero escrito dentro: lo lee de
    ?v=. Cambiar APP_VERSION basta para que el navegador vea un sw.js distinto,
    lo reinstale y estrene cache. Se acabo el olvido de subirlo a mano. */
-const APP_VERSION = 'v36';
+const APP_VERSION = 'v37';
 if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
   try{ navigator.serviceWorker.register('sw.js?v='+APP_VERSION); }catch(e){}
 }
