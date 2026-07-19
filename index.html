@@ -493,7 +493,7 @@ html.light .check-row.done .box{color:#fff;}
     </div>
   </header>
   <div class="ver" id="verFoot">
-    <span id="verApp">Calma v37</span> · <span id="verCache">caché: comprobando…</span>
+    <span id="verApp">Calma v38</span> · <span id="verCache">caché: comprobando…</span>
   </div>
 
   <!-- ============ AHORA ============ -->
@@ -798,7 +798,7 @@ html.light .check-row.done .box{color:#fff;}
    por la URL, asi que sw.js ya no lleva el numero escrito dentro: lo lee de
    ?v=. Cambiar APP_VERSION basta para que el navegador vea un sw.js distinto,
    lo reinstale y estrene cache. Se acabo el olvido de subirlo a mano. */
-const APP_VERSION = 'v37';
+const APP_VERSION = 'v38';
 if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
   try{ navigator.serviceWorker.register('sw.js?v='+APP_VERSION); }catch(e){}
 }
@@ -2529,6 +2529,11 @@ var ACCIONES=['addKitItem','addQuote','addSleepItem','calMove','cerrarSiFondo','
  'setTab','setThemeMode','shuffleQuote','stepMove','thTogglePeek','toggleBreath','toggleDiag',
  'exportCSV','exportMD','imprimirRegistro',
  'toggleHC','toggleThemePop','uiDisconnect','uiLogin','uiSignup','uiTogglePass',
+ /* v38: uiResolve faltaba desde la v27. Los dos botones del cuadro de conflicto
+    de nube no hacian NADA al pulsarlos: el despachador los bloqueaba por no
+    estar autorizados. No se detecto antes porque ese cuadro solo aparece
+    cuando hay un conflicto de verdad entre dos dispositivos. */
+ 'uiResolve',
  'setThemeDark','setThemeLight','toggleAnim','setAnimMs'];
 var CAMBIOS=['leerArchivo','setAccColor','setShutdown','setThemeDark','setThemeLight'];
 
