@@ -493,7 +493,7 @@ html.light .check-row.done .box{color:#fff;}
     </div>
   </header>
   <div class="ver" id="verFoot">
-    <span id="verApp">Calma v38</span> · <span id="verCache">caché: comprobando…</span>
+    <span id="verApp">Calma v40</span> · <span id="verCache">caché: comprobando…</span>
   </div>
 
   <!-- ============ AHORA ============ -->
@@ -798,7 +798,7 @@ html.light .check-row.done .box{color:#fff;}
    por la URL, asi que sw.js ya no lleva el numero escrito dentro: lo lee de
    ?v=. Cambiar APP_VERSION basta para que el navegador vea un sw.js distinto,
    lo reinstale y estrene cache. Se acabo el olvido de subirlo a mano. */
-const APP_VERSION = 'v38';
+const APP_VERSION = 'v40';
 if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
   try{ navigator.serviceWorker.register('sw.js?v='+APP_VERSION); }catch(e){}
 }
@@ -1224,18 +1224,34 @@ async function cloudPush(){
   const ms = Date.parse(now);
   CLOUD.meta.lastSyncedAt = Date.now();
   CLOUD.meta.lastRemoteUpdatedAt = ms;
-  await saveMeta();
+  await saveMeta(true);          // v39: nadie más va a escribir después
 }
 async function cloudPull(remote){
   setState(remote.data);
   CLOUD.meta.lastSyncedAt = Date.now();
   CLOUD.meta.lastLocalChange = CLOUD.meta.lastSyncedAt;
   CLOUD.meta.lastRemoteUpdatedAt = remote.updated_ms;
-  await saveMeta();
+  await saveMeta(true);          // v39: setState guardó ANTES de fijar la meta
 }
 /* La meta viaja DENTRO del estado de la app: así cada cambio provoca UNA sola
-   escritura, no dos. Evita agotar el límite de peticiones del almacenamiento. */
-async function saveMeta(){ try{ if(typeof S==='object'&&S) S.__sync=CLOUD.meta; }catch(e){} }
+   escritura, no dos. Evita agotar el límite de peticiones del almacenamiento.
+
+   v39 - EL FALLO QUE ESTO ARREGLA. Hasta la v38, saveMeta() solo tocaba S en
+   memoria y nunca escribía en el almacén. Desde markLocalChange() da igual,
+   porque save() escribe 900 ms después de todas formas. Pero cloudPush() y
+   cloudPull() NO van seguidos de ninguna escritura: sus marcas de tiempo se
+   perdían al recargar, cloudInit volvía a leer la meta vieja y el conflicto
+   reaparecía en CADA F5, aunque acabaras de resolverlo.
+   Por eso ahora persistir es un parámetro: false donde ya va a escribirse solo
+   (una escritura por cambio, como antes), true donde nadie más va a escribir.
+   Para revertir, llamar siempre sin argumento. */
+async function saveMeta(persistir){
+  try{
+    if(typeof S!=='object' || !S) return;
+    S.__sync = CLOUD.meta;
+    if(persistir) await writeState(1);   // writeState lleva reintentos y avisos
+  }catch(e){}
+}
 function markLocalChange(){ CLOUD.meta.lastLocalChange = Date.now(); saveMeta(); }
 
 /* ---------- orquestación ---------- */
@@ -1419,14 +1435,31 @@ function showConflict(remote){
     '<button data-act=\"uiResolve\" data-arg=\"pull\">Traer lo de la nube</button>'+
     '</div></div>';
 }
+/* v40. Antes esta funcion era la UNICA accion async de la nube sin try/catch
+   (uiLogin, uiSignup y cloudSync si lo tenian). Si la red fallaba a mitad:
+     - el cuadro de conflicto ya se habia borrado, asi que desaparecia
+     - el error se perdia sin capturar: ningun mensaje en pantalla
+     - la meta ya estaba medio cambiada, asi que el conflicto volvia despues
+   El usuario veia exactamente lo mismo que con un boton roto: nada.
+   Dos cambios: se captura el error y se avisa, y el cuadro NO se borra hasta
+   que la operacion sale bien, para poder reintentar. */
 async function uiResolve(which){
   if(!confirm(which==='push'?'La versión de la nube se reemplazará por la de este dispositivo. Seguro?':'Los datos de este dispositivo se reemplazarán por los de la nube. Seguro?')) return;
-  $('#conflictSlot').innerHTML='';
-  CLOUD.meta.lastRemoteUpdatedAt = which==='pull' ? 0 : Date.now();
-  if(which==='push'){ CLOUD.meta.lastRemoteUpdatedAt=0; await cloudSync({force:'push'}); }
-  else {
-    const remote=await cloudFetchRemote();
-    if(remote){ await cloudPull(remote); renderAll(); CLOUD.status='ok'; renderCloud(); }
+  const previo = CLOUD.meta.lastRemoteUpdatedAt;
+  try{
+    CLOUD.meta.lastRemoteUpdatedAt = which==='pull' ? 0 : Date.now();
+    if(which==='push'){ CLOUD.meta.lastRemoteUpdatedAt=0; await cloudSync({force:'push'}); }
+    else {
+      const remote=await cloudFetchRemote();
+      if(remote){ await cloudPull(remote); renderAll(); }
+    }
+    const slot=$('#conflictSlot'); if(slot) slot.innerHTML='';   // solo si fue bien
+    CLOUD.status='ok'; renderCloud();
+  }catch(e){
+    CLOUD.meta.lastRemoteUpdatedAt = previo;      // se deshace el cambio a medias
+    CLOUD.status='error'; CLOUD.lastError=(e&&e.message)||String(e);
+    toast('No se pudo resolver: '+CLOUD.lastError+'. El conflicto sigue ahí; puedes reintentarlo.');
+    renderCloud();
   }
 }
 
@@ -1979,6 +2012,7 @@ function closeSteps(){
   if(!anyExerciseOpen()) wlRelease();
 }
 function stepMove(dir){
+  if(!flow) return;      // v40: sin ejercicio abierto no hay nada que mover
   clearInterval(stepInterval);
   stepIdx+=dir;
   if(stepIdx<0) stepIdx=0;
