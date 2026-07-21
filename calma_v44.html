@@ -1,0 +1,2955 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- v36: pide a los buscadores que no indexen la app.
+     QUÉ HACE: cuando Google o Bing rastrean la página y leen esta etiqueta,
+     la retiran de sus resultados aunque otros sitios enlacen a ella.
+     QUÉ NO HACE, para que quede claro:
+     - No esconde el repositorio de GitHub. Con el plan gratuito, GitHub Pages
+       obliga a que el repositorio sea público: el código se ve igual, y la
+       búsqueda de GitHub lo encuentra. No hay etiqueta que lo evite.
+     - No impide entrar a nadie que tenga la URL.
+     - Depende de que el buscador respete la etiqueta; algunos la ignoran.
+     La seguridad de los datos NO está aquí: está en RLS y en la contraseña.
+     NO añadir un robots.txt que bloquee esta página: si el rastreador no puede
+     leerla, nunca ve esta etiqueta y la URL puede acabar indexada igual. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E1116">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Calma — regulación emocional</title>
+<!-- v27: ya no queda ni un manejador en linea (onclick=/onchange=): todo pasa
+     por data-act/data-chg y un despachador con lista blanca. script-src sigue
+     con 'unsafe-inline' por una razon concreta: la app ES un archivo suelto y
+     su codigo va dentro del propio HTML, asi que sin 'unsafe-inline' el navegador
+     bloquearia el propio codigo de la app. Para cerrarlo del todo haria falta
+     poner el hash sha256 del script, y entonces cada edicion del codigo obliga
+     a recalcularlo o la app deja de arrancar. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0E1116;
+  --surface:#151920;
+  --surface2:#12151b;
+  --line:rgba(255,255,255,.08);
+  --line2:rgba(255,255,255,.15);
+  --txt:#EAEEF5;
+  --muted:#9AA4B4;
+  --faint:#788395;
+  --glow:#181d25;
+  --peekbg:rgba(19,23,30,.96);
+  --teal:#4FD1C5;
+  --teal-dim:rgba(79,209,197,.14);
+  --amber:#F6C177;
+  --amber-dim:rgba(246,193,119,.14);
+  --coral:#F07178;
+  --coral-dim:rgba(240,113,120,.16);
+  --mono:'JetBrains Mono',monospace;
+  --radius:16px;--anim:180ms;
+}
+:root{--prac:#E08A5A;--prac-dim:rgba(224,138,90,.14);}
+html.light{
+  --prac:#A85425;
+  --prac-dim:rgba(168,84,37,.10);
+  --teal:#0B7C71;
+  --teal-dim:rgba(11,124,113,.10);
+  --amber:#9A6A10;
+  --amber-dim:rgba(154,106,16,.10);
+  --coral:#C23B44;
+  --coral-dim:rgba(194,59,68,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  background:var(--bg);color:var(--txt);
+  font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.55;
+  overscroll-behavior-y:contain;
+}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em;}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.mono{font-family:var(--mono);}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+
+/* ---------- layout ---------- */
+#app{max-width:520px;margin:0 auto;padding:18px 16px 120px;}
+header.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
+header.top h1{font-size:1.35rem;flex:1;}
+header.top .date{color:var(--muted);font-size:.8rem;}
+.tab-panel{display:none;animation:fadein .18s ease;}
+.tab-panel:focus{outline:none;}
+.tab-panel.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;}
+}
+
+/* ---------- theme popover (patrón rueda-color v57) ---------- */
+#themeWrap{position:relative;}
+#themeWrap .tbtn{background:var(--surface);border:1px solid var(--line2);border-radius:9px;color:var(--muted);font-size:15px;padding:6px 11px;cursor:pointer;transition:.14s;}
+#themeWrap .tbtn:hover{color:var(--txt);}
+#themePop{
+  position:absolute;right:0;top:42px;z-index:55;width:min(300px,86vw);
+  background:var(--peekbg);border:1px solid var(--line2);border-radius:14px;padding:14px;
+  backdrop-filter:blur(10px);
+}
+#themePop.hidden{display:none;}
+.thmodes{display:flex;gap:6px;margin-bottom:12px;}
+/* los tres modos: misma caja, icono y texto en una sola linea */
+.thmodes .tchip{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:8px 6px;min-height:44px;white-space:nowrap;text-align:center;}
+.thmodes .tchip .ico{display:inline-block;width:1.15em;line-height:1;font-size:13px;text-align:center;flex:none;}
+.tchip{border:1px solid var(--line2);background:transparent;color:var(--muted);border-radius:99px;padding:7px 13px;font-size:12.5px;font-weight:500;transition:.14s;}
+.tchip:hover{color:var(--txt);}
+.tchip.on{border-color:#8ab4ff;color:#cfe0ff;background:rgba(138,180,255,.1);}
+html.light .tchip.on{border-color:#2b6cd9;color:#2b6cd9;background:rgba(43,108,217,.08);font-weight:700;}
+.thlab{font-size:11px;color:var(--muted);margin:0 0 8px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;}
+.thsws{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px;}
+.thsw{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.2);cursor:pointer;padding:0;}
+html.light .thsw{border-color:rgba(0,0,0,.15);}
+.thsw.on{outline:2px solid #8ab4ff;outline-offset:2px;}
+.thcustom{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);}
+.thcustom input[type=color]{width:40px;height:30px;border:1px solid var(--line2);border-radius:7px;background:transparent;padding:2px;cursor:pointer;}
+.thhex{font-family:var(--mono);font-size:11.5px;margin-left:auto;}
+.thdim{opacity:.4;pointer-events:none;}
+.thct{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--muted);margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--line);}
+.thct b{font-family:var(--mono);font-size:11.5px;}
+.accchip{display:inline-flex;align-items:center;gap:6px;}
+.accchip .sw{width:11px;height:11px;border-radius:50%;flex:none;border:1px solid rgba(128,128,128,.35);}
+.thct.ok b{color:#4CC38A}.thct.mid b{color:#E6C35C}.thct.ko b{color:#F07A7A}
+html.hc .tchip.on{background:#8ab4ff;color:#0E1116;border-color:#8ab4ff;font-weight:700;}
+html.light.hc .tchip.on{background:#1E5BC6;color:#fff;border-color:#1E5BC6;}
+html.hc .thsw{border-color:rgba(255,255,255,.6);}
+html.light.hc .thsw{border-color:rgba(0,0,0,.55);}
+.mini{border:1px solid var(--line2);border-radius:8px;padding:9px 12px;min-width:40px;font-size:12px;color:var(--muted);}
+.mini:hover{color:var(--txt);}
+.mini.on{border-color:var(--teal);color:var(--teal);font-weight:600;}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+.card h3{font-size:1rem;margin-bottom:6px;}
+.card p{color:var(--muted);font-size:.88rem;}
+.card p strong{color:var(--txt);}
+.eyebrow{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;display:block;}
+/* ---------- animaciones (v30) ----------
+   Solo se animan transform y opacity: de esas dos se encarga la tarjeta
+   grafica sin recalcular la pagina, asi que no hay tirones en el movil.
+   Animar height, width o top obligaria a rehacer la maquetacion en cada
+   fotograma. La duracion sale de --anim, que la fija ANIM_MS desde el JS.
+   La pestana de crisis no aparece en ninguna regla de aqui: a proposito. */
+@keyframes anIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+@keyframes anOut{to{opacity:0;transform:translateY(-6px) scale(.98);}}
+@keyframes anPulse{50%{transform:scale(1.18);}}
+@keyframes anStar{40%{transform:scale(1.35) rotate(-12deg);}}
+@keyframes anDraw{from{stroke-dashoffset:30;}to{stroke-dashoffset:0;}}
+.an-in{animation:anIn var(--anim) ease-out;}
+.an-out{animation:anOut calc(var(--anim) * .9) ease-in forwards;}
+.an-check .box{animation:anPulse var(--anim) ease-out;}
+.an-check .box .ic{stroke-dasharray:30;animation:anDraw var(--anim) ease-out;}
+/* v31: era .an-star .ic, y la clase va en la FILA entera, asi que alcanzaba
+   tambien al icono de borrar: al marcar favorita saltaban la estrella y la ✕.
+   Ahora el selector baja hasta el boton de la estrella. */
+.an-star .qstar .ic{animation:anStar calc(var(--anim) * .85) ease-out;}
+/* La preferencia del sistema ya la corta la regla global de arriba
+   (*{animation:none} bajo prefers-reduced-motion). Aqui solo hace falta el
+   interruptor propio, para poder apagarlas aunque el sistema no lo pida. */
+html.noanim *,html.noanim *::before,html.noanim *::after{animation:none !important;transition:none !important;}
+.ic{width:1em;height:1em;display:inline-block;vertical-align:-.125em;
+  fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.ic.big{width:1.15em;height:1.15em;stroke-width:2.2;}
+.ic.fill{fill:currentColor;stroke:currentColor;stroke-width:1.2;}
+.ic.hollow{fill:none;stroke:currentColor;stroke-width:1.6;}
+.pill{display:inline-block;font-size:.72rem;padding:2px 9px;border-radius:99px;margin-bottom:8px;}
+/* v25: titulo de tarjeta. Antes estas tres etiquetas usaban .pill, que es la
+   insignia de nivel de evidencia (verde/ambar/naranja); dos de ellas salian
+   ambar y por eso nunca cambiaban con el acento. Ahora son titulos, con el
+   mismo aire que la etiqueta de la Frase del dia. */
+.card-lead{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;
+  font-weight:700;color:var(--teal);margin-bottom:10px;}
+.pill.amber{background:var(--amber-dim);color:var(--amber);}
+.pill.teal{background:var(--teal-dim);color:var(--teal);}
+.pill.prac{background:var(--prac-dim);color:var(--prac);}
+.slot-check{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.slot-check button{
+  background:var(--surface2);border:1px solid var(--line);border-radius:14px;
+  padding:14px 8px;text-align:center;font-size:.84rem;min-height:64px;
+}
+.slot-check button .ico{display:block;font-size:1.3rem;margin-bottom:4px;}
+.slot-check button.on{background:var(--teal-dim);border-color:var(--teal);color:var(--teal);}
+.cloud-state{display:flex;align-items:center;gap:8px;font-size:.86rem;margin-bottom:10px;}
+.cloud-dot{width:10px;height:10px;border-radius:50%;background:var(--faint);flex:none;}
+.cloud-dot.ok{background:var(--teal);} .cloud-dot.sync{background:var(--amber);} 
+.cloud-dot.error{background:var(--coral);} .cloud-dot.conflict{background:var(--coral);}
+.cloud-form{display:flex;gap:8px;margin-top:10px;}
+.cloud-form input{
+  flex:1;background:var(--surface2);border:1px solid var(--line);border-radius:12px;
+  padding:12px;color:var(--txt);font-family:inherit;font-size:16px;min-height:44px;
+}
+.cloud-form button{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal);border-radius:12px;padding:0 16px;font-weight:600;min-height:44px;}
+.cloud-form button.eye{padding:0;width:44px;min-width:44px;flex:none;display:flex;align-items:center;justify-content:center;}
+.conflict-box{background:var(--surface2);border:1px solid var(--coral);border-radius:14px;padding:14px;margin-top:10px;}
+.conflict-box .opt{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.conflict-box .opt button{flex:1;min-width:130px;padding:12px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:.85rem;}
+.time-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
+.time-row label{color:var(--muted);font-size:.85rem;}
+.quote-day{
+  background:var(--surface);border:1px solid var(--teal);border-radius:var(--radius);
+  padding:20px 18px;margin-bottom:14px;position:relative;
+}
+.quote-day .qd-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--teal);display:block;margin-bottom:10px;}
+.quote-day .qd-text{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;line-height:1.45;}
+.quote-day .qd-shuffle{
+  position:absolute;top:10px;right:10px;min-width:44px;min-height:44px;
+  border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:1rem;
+}
+.quote-row{
+  display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;
+  padding:13px 14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;margin-bottom:9px;
+}
+.quote-row .qtext{flex:1;font-size:.9rem;line-height:1.5;}
+.quote-row .qstar,.quote-row .qdel{
+  min-width:40px;min-height:40px;flex:none;font-size:1.05rem;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;border-radius:10px;
+}
+.quote-row .qstar.on{color:var(--amber);}
+.time-row input[type=time]{
+  background:var(--surface2);border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;color:var(--txt);font-family:var(--mono);font-size:.95rem;min-height:44px;
+}
+
+/* ---------- bottom nav ---------- */
+nav.tabs{
+  position:fixed;bottom:calc(10px + env(safe-area-inset-bottom));left:10px;right:10px;z-index:40;
+  background:var(--peekbg);backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:var(--radius);
+  display:flex;justify-content:space-around;
+  padding:6px 4px;
+  max-width:500px;margin:0 auto;
+}
+nav.tabs button{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 1px;border-radius:12px;color:var(--muted);font-size:.62rem;font-weight:500;
+  min-width:0;min-height:48px;justify-content:center;
+}
+nav.tabs button .ico{font-size:1.28rem;}
+nav.tabs button .lbl{display:none;}
+nav.tabs button.active .lbl{display:block;}
+nav.tabs button.active .ico{font-size:1.12rem;}
+nav.tabs button.active{color:var(--teal);background:var(--teal-dim);}
+
+/* ---------- SOS ---------- */
+#sosBtn{
+  position:fixed;right:16px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:41;
+  width:64px;height:64px;border-radius:50%;
+  background:#F07178;color:#0B0E14;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;
+  box-shadow:0 6px 22px rgba(240,113,120,.4);
+}
+#sosBtn:active{transform:scale(.94);}
+
+/* ---------- AHORA ---------- */
+.crisis-banner{
+  background:var(--coral-dim);border:1px solid var(--coral);
+  border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;
+  font-family:'Space Grotesk',sans-serif;font-size:1.05rem;color:var(--coral);
+}
+.big-option{
+  width:100%;display:flex;align-items:center;gap:14px;text-align:left;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 16px;margin-bottom:12px;
+}
+.big-option:active{background:var(--surface2);}
+.big-option .ico{font-size:1.6rem;}
+.big-option .t{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;}
+.big-option .s{color:var(--muted);font-size:.82rem;}
+
+/* ---------- overlays ---------- */
+.overlay{
+  position:fixed;inset:0;z-index:60;background:var(--bg);
+  display:none;flex-direction:column;padding:22px 20px calc(22px + env(safe-area-inset-bottom));
+  max-width:520px;margin:0 auto;
+}
+.overlay.open{display:flex;}
+.overlay .ov-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.overlay .ov-head h2{font-size:1.1rem;}
+.ov-close{color:var(--muted);font-size:.85rem;padding:11px 16px;min-height:44px;border:1px solid var(--line);border-radius:99px;}
+.step-body{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px;}
+.step-body .step-ico{font-size:2.6rem;}
+.step-body .step-title{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;}
+.step-body .step-text{color:var(--muted);font-size:1rem;max-width:34ch;margin:0 auto;}
+.step-count{color:var(--muted);font-size:.75rem;letter-spacing:.1em;}
+.step-timer{font-size:2rem;color:var(--amber);}
+.ov-actions{display:flex;gap:10px;}
+.btn{
+  flex:1;padding:15px;border-radius:14px;font-weight:600;font-size:.95rem;text-align:center;
+  background:var(--surface2);border:1px solid var(--line);
+}
+.btn.primary{background:var(--teal);color:#0B0E14;border:none;}
+html.light .btn.primary{color:#fff;}
+.btn.warm{background:var(--amber);color:#0B0E14;border:none;}
+html.light .btn.warm{color:#fff;}
+
+/* ---------- respiración ---------- */
+#breathWrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;}
+#breathCircle{
+  width:170px;height:170px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, rgba(79,209,197,.55), rgba(79,209,197,.12) 65%);
+  border:2px solid var(--teal);
+  transform:scale(.7);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform 1s linear;
+}
+#breathPhase{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;}
+#breathCount{font-size:2.4rem;color:var(--teal);}
+#breathCycles{color:var(--muted);font-size:.8rem;}
+.breath-note{color:var(--faint);font-size:.75rem;}
+.bk-note{font-size:.8rem;color:var(--muted);margin-bottom:8px;}
+.bk-note.aviso{color:var(--amber);background:var(--amber-dim);border:1px solid var(--amber);border-radius:10px;padding:8px 10px;}
+.diag-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.82rem;color:var(--muted);}
+.diag-toggle{color:var(--teal);font-size:.8rem;font-weight:600;min-height:44px;padding:0 4px;flex:none;}
+.ver{margin:-8px 0 14px;color:var(--faint);font-size:.68rem;font-family:var(--mono);letter-spacing:.02em;}
+
+/* ---------- checklists ---------- */
+.check-row{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:14px 14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;margin-bottom:9px;
+}
+.check-row .box{
+  width:24px;height:24px;border-radius:8px;border:2px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;flex:none;
+}
+.check-row.done .box{background:var(--teal);border-color:var(--teal);color:#0B0E14;}
+html.light .check-row.done .box{color:#fff;}
+.check-row.done .lbl{color:var(--muted);text-decoration:line-through;}
+.check-row .lbl{font-size:.92rem;}
+.check-row .sub{display:block;color:var(--muted);font-size:.78rem;}
+.check-row{cursor:pointer;}
+.check-row .del{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:12px;margin:-8px -6px -8px 0;flex:none;}
+
+.add-row{display:flex;gap:8px;margin-top:4px;}
+.add-row input{
+  flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:12px;color:var(--txt);font-family:inherit;font-size:.9rem;
+}
+.add-row input::placeholder{color:var(--faint);}
+.add-row button{background:var(--teal-dim);color:var(--teal);border-radius:12px;padding:0 16px;font-weight:600;}
+
+.reassure{
+  background:var(--teal-dim);border:1px solid var(--teal);border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:14px;font-size:.9rem;color:var(--teal);
+}
+
+/* ---------- interocepción ---------- */
+.body-check{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px;}
+.body-check button{
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:14px 10px;text-align:center;font-size:.86rem;
+}
+.body-check button .ico{display:block;font-size:1.3rem;margin-bottom:4px;}
+.body-check button.on{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+#bodyResult{display:none;}
+
+/* ---------- calendario ---------- */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cal-head h3{font-size:1rem;text-transform:capitalize;}
+.cal-head button{min-width:44px;min-height:44px;padding:6px 14px;border:1px solid var(--line);border-radius:10px;color:var(--muted);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.cal-grid .dow{text-align:center;font-size:.66rem;color:var(--faint);padding:4px 0;text-transform:uppercase;}
+.cal-day{
+  aspect-ratio:1;border-radius:10px;background:var(--surface2);border:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  font-size:.72rem;color:var(--muted);position:relative;
+}
+.cal-day.empty{background:none;border:none;}
+.cal-day.today{border-color:var(--teal);}
+.cal-day .mood{font-size:.85rem;line-height:1;}
+.cal-day.mood-calm{background:var(--teal-dim);border-color:var(--teal);}
+.cal-day.mood-anx{background:var(--amber-dim);border-color:var(--amber);}
+.cal-day.mood-tense{background:var(--prac-dim);border-color:var(--prac);}
+.cal-day.mood-storm{background:var(--coral-dim);border-color:var(--coral);}
+.cal-day .sos-dot{position:absolute;top:3px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--coral);}
+.cal-day .note-dot{position:absolute;top:3px;left:4px;width:6px;height:6px;border-radius:50%;background:var(--amber);}
+.cal-checks{position:absolute;bottom:2px;left:5px;right:5px;display:flex;gap:2px;height:4px;}
+.cal-checks i{flex:1;border-radius:2px;background:var(--line2);}
+.cal-checks i.on{background:var(--teal);}
+.cal-summary{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);font-size:.82rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 14px;}
+.cal-summary b{color:var(--txt);font-weight:600;}
+.cal-legend{margin-top:8px;font-size:.76rem;color:var(--faint);line-height:1.9;}
+
+/* ---------- selector de estado del día ---------- */
+#moodPick{
+  position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.5);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+#moodPick.open{display:flex;}
+#moodPick .sheet{
+  background:var(--surface);border:1px solid var(--line2);border-radius:18px;
+  padding:18px;width:min(320px,90vw);
+}
+#moodPick h3{font-size:.95rem;margin-bottom:12px;}
+#moodPick .opts{display:flex;flex-direction:column;gap:8px;}
+#moodPick .opts button{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;text-align:left;
+  background:var(--surface2);border:1px solid var(--line);border-radius:12px;font-size:.9rem;
+}
+#moodPick .opts button .em{font-size:1.25rem;}
+#moodPick .opts button.sel{border-color:var(--teal);background:var(--teal-dim);}
+#moodPick .opts button.clear{color:var(--muted);justify-content:center;}
+#moodPick .noteIn{
+  width:100%;margin-top:10px;background:var(--surface2);border:1px solid var(--line);
+  border-radius:12px;padding:10px 12px;color:var(--txt);font-family:inherit;font-size:.86rem;resize:none;
+}
+#moodPick .noteIn::placeholder{color:var(--faint);}
+#moodPick .pick-actions{display:flex;margin-top:10px;}
+#moodPick .pick-actions button{
+  flex:1;padding:12px;min-height:44px;border-radius:12px;font-weight:600;font-size:.9rem;
+  background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal);
+}
+
+/* ---------- copia de seguridad ---------- */
+#backupTA{
+  width:100%;min-height:110px;background:var(--surface2);border:1px solid var(--line);
+  border-radius:12px;padding:10px;color:var(--txt);font-family:var(--mono);font-size:.72rem;
+  resize:vertical;margin:10px 0;
+}
+.bk-row{display:flex;gap:8px;flex-wrap:wrap;}
+.bk-row button{
+  flex:1;min-width:120px;padding:11px;border-radius:12px;font-weight:600;font-size:.85rem;
+  background:var(--surface2);border:1px solid var(--line);
+}
+.bk-row button.accent{background:var(--teal-dim);color:var(--teal);border-color:var(--teal);}
+
+/* toast */
+/* v44: la barra de deshacer vive encima de la de pestanas y a la izquierda del
+   SOS, que ocupa 64px + 16 de margen. Nunca los tapa. */
+#undoBar{
+  position:fixed;left:16px;right:96px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:60;
+  display:none;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--line2);border-radius:12px;
+  padding:10px 12px;font-size:.84rem;box-shadow:0 6px 22px rgba(0,0,0,.28);
+}
+#undoBar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#undoBar button{
+  flex:0 0 auto;background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal);
+  border-radius:10px;padding:8px 12px;font-size:.82rem;min-height:44px;
+}
+#toast{
+  position:fixed;left:50%;bottom:calc(160px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);
+  background:var(--surface);border:1px solid var(--line2);border-radius:12px;
+  padding:10px 18px;font-size:.85rem;opacity:0;pointer-events:none;transition:.25s;z-index:70;
+}
+#toast.show{opacity:1;transform:translateX(-50%);}
+/* =================== impresion (v34 - C10) ===================
+   Para llevar un mes del registro a una consulta en papel. Se imprime SOLO el
+   calendario del mes que estas viendo, su resumen y las notas: nada de barra
+   de pestanas, boton SOS, panel de tema ni cuadros de copia.
+   Fondo blanco y texto negro a proposito: el tema oscuro gasta tinta y sale
+   gris. Los colores de estado se sustituyen por el borde y el emoji, que si se
+   distinguen impresos y tambien en blanco y negro.
+   Para revertir, se borra este bloque entero: no afecta a nada de la pantalla. */
+@media print{
+  :root{ --bg:#fff; --surface:#fff; --text:#000; --muted:#333; --faint:#555; --line:#999; }
+  html,body{ background:#fff !important; color:#000 !important; }
+  body{ padding:0 !important; font-size:11pt; }
+  /* fuera todo lo que no sea el registro */
+  nav.tabs, #sosBtn, #themePop, #themeBtn, .bk-row, #backupTA, #expCard, #undoBar,
+  #cloudCard, #diagCard, #bkNote, .breath-wrap, .steps-layer, #toast,
+  .tab-panel:not(#tab-registro){ display:none !important; }
+  .eyebrow{ display:none !important; }
+  .card{ border:none !important; box-shadow:none !important; padding:0 !important;
+         background:#fff !important; break-inside:avoid; }
+  /* el calendario impreso: borde en vez de fondo de color */
+  .cal-day{ background:#fff !important; border:1px solid #999 !important; color:#000 !important; }
+  .cal-day.mood-calm{ border-width:2px !important; }
+  .cal-day.mood-anx{ border-style:dashed !important; border-width:2px !important; }
+  .cal-day.mood-tense{ border-style:dotted !important; border-width:2px !important; }
+  .cal-day.mood-storm{ border-width:3px !important; }
+  .cal-day.today{ outline:1px solid #000; }
+  .cal-summary{ border-top:1px solid #999; padding-top:8px; }
+  #printNotas{ display:block !important; }
+  a[href]:after{ content:''; }        /* sin URLs pegadas detras de los enlaces */
+  @page{ margin:14mm; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="readWarn" style="display:none;background:var(--coral-dim);border:1px solid var(--coral);color:var(--coral);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.86rem;" role="alert"></div>
+  <div id="saveWarn" style="display:none;background:var(--coral-dim);border:1px solid var(--coral);color:var(--coral);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.86rem;" role="alert"></div>
+
+<!-- v28: iconos de interfaz en SVG. Van en un sprite para no repetir el dibujo
+     en cada boton, y usan currentColor: asi toman el acento igual que el texto
+     que los rodea. Los emoji de las pestanas NO se tocan: alli el color propio
+     de cada uno es lo que permite reconocerlas de un vistazo. -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><defs>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-prev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.7l5.9-.9z"/></symbol>
+</defs></svg>
+
+  <header class="top">
+    <h1>Calma</h1>
+    <span class="date" id="todayLabel"></span>
+    <div id="themeWrap">
+      <button class="tbtn" id="themeBtn" aria-label="Tema y accesibilidad" aria-expanded="false" data-act="toggleThemePop">🌓</button>
+      <div id="themePop" class="hidden"></div>
+    </div>
+  </header>
+  <div class="ver" id="verFoot">
+    <span id="verApp">Calma v44</span> · <span id="verCache">caché: comprobando…</span>
+  </div>
+
+  <!-- ============ AHORA ============ -->
+  <section class="tab-panel" tabindex="-1" id="tab-ahora">
+    <div class="crisis-banner">Si puedes, sal del sitio ahora. Busca un lugar tranquilo. Lo demás puede esperar.</div>
+    <button class="big-option" data-act="openBreath">
+      <span class="ico">🫧</span>
+      <span><span class="t">Respirar 4-7-8</span><br><span class="s">Círculo guiado. Solo sigue el ritmo.</span></span>
+    </button>
+    <button class="big-option" data-act="openSteps" data-arg="tipp">
+      <span class="ico">🧊</span>
+      <span><span class="t">TIPP</span><br><span class="s">Bajar la activación con el cuerpo.</span></span>
+    </button>
+    <button class="big-option" data-act="openSteps" data-arg="stop">
+      <span class="ico">✋</span>
+      <span><span class="t">STOP</span><br><span class="s">Pausa antes de reaccionar.</span></span>
+    </button>
+    <div class="card">
+      <h3>Si no puedes salir</h3>
+      <p>Ponte los tapones o auriculares. Ve al borde de la sala, cerca de una pared o salida. Sujeta tu fidget y aprieta despacio. Nadie tiene que enterarse.</p>
+    </div>
+  </section>
+
+  <!-- ============ DESPUÉS ============ -->
+  <section class="tab-panel" tabindex="-1" id="tab-despues">
+    <div class="reassure">Esto no fue culpa tuya. Fue tu sistema nervioso en sobrecarga. Ahora toca recuperarse, sin prisa.</div>
+    <span class="eyebrow">Checklist de recuperación · hoy</span>
+    <div id="afterList"></div>
+    <div class="card">
+      <h3>Cuánto dura esto</h3>
+      <p>Lo que necesites. Para algunas personas son 20 minutos; para otras, el resto del día. No es tiempo perdido: es parte del proceso.</p>
+    </div>
+  </section>
+
+  <!-- ============ KIT ============ -->
+  <section class="tab-panel" tabindex="-1" id="tab-kit">
+    <span class="eyebrow">¿Lo llevo hoy en la mochila?</span>
+    <div id="kitList"></div>
+    <div class="add-row">
+      <input id="kitInput" type="text" placeholder="Añadir item al kit…" maxlength="40">
+      <button data-act="addKitItem" aria-label="Añadir item"><svg class="ic big" aria-hidden="true"><use href="#i-plus"></use></svg></button>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <h3>Regla del kit</h3>
+      <p>Prueba cada item en calma antes de necesitarlo en crisis. Si algo te activa en vez de calmarte (como te pasó con el chicle), fuera sin dudar: el kit se adapta a ti, no al revés.</p>
+    </div>
+  </section>
+
+  <!-- ============ BUCLE ============ -->
+  <section class="tab-panel" tabindex="-1" id="tab-bucle">
+    <div class="card">
+      <span class="card-lead">El circuito</span>
+      <p><strong>No puedo empezar → me agobio por no empezar → el agobio me bloquea más.</strong> El objetivo no es estudiar ya. El objetivo es cortar el circuito. Estudiar viene solo después.</p>
+    </div>
+    <span class="eyebrow">Corta el bucle, en orden</span>
+    <button class="big-option" data-act="openSteps" data-arg="nombrar">
+      <span class="ico">🏷️</span>
+      <span><span class="t">1 · Nómbralo</span><br><span class="s">Decir lo que pasa calma la amígdala.</span></span>
+    </button>
+    <button class="big-option" data-act="openSteps" data-arg="cuerpo">
+      <span class="ico">🚶</span>
+      <span><span class="t">2 · Mueve el cuerpo</span><br><span class="s">Descarga la tensión acumulada.</span></span>
+    </button>
+    <button class="big-option" data-act="openSteps" data-arg="micro">
+      <span class="ico">⏱️</span>
+      <span><span class="t">3 · Micro-inicio (5 min)</span><br><span class="s">Acción opuesta: empezar pequeñísimo.</span></span>
+    </button>
+    <span class="eyebrow" style="margin-top:14px;">Más herramientas de casa</span>
+    <button class="big-option" data-act="openSteps" data-arg="pmr">
+      <span class="ico">💪</span>
+      <span><span class="t">Relajación muscular</span><br><span class="s">Tensar y soltar, grupo a grupo.</span></span>
+    </button>
+    <button class="big-option" data-act="openSteps" data-arg="hechos">
+      <span class="ico">🔎</span>
+      <span><span class="t">Comprobar los hechos</span><br><span class="s">¿Qué es real y qué es rumiación?</span></span>
+    </button>
+    <button class="big-option" data-act="openBreath">
+      <span class="ico">🫧</span>
+      <span><span class="t">Respirar 4-7-8</span><br><span class="s">También funciona en el sofá.</span></span>
+    </button>
+  </section>
+
+  <!-- ============ SUEÑO ============ -->
+  <section class="tab-panel" tabindex="-1" id="tab-sueno">
+    <div class="card">
+      <span class="card-lead">Tu foco</span>
+      <p><strong>Cortar la activación mental nocturna.</strong> Tu problema no es el móvil (2 canciones no hacen daño): es seguir en el ordenador con algo que enciende la cabeza justo antes de acostarte.</p>
+      <div class="time-row">
+        <label for="shutdownTime">Hora de cierre del ordenador:</label>
+        <input type="time" id="shutdownTime" data-chg="setShutdown" aria-label="Hora de cierre del ordenador">
+      </div>
+      <p style="margin-top:8px;font-size:.78rem;color:var(--faint);">La app no puede lanzar avisos sola: pon una alarma en el móvil a esta hora. Aquí queda escrita para que la rutina tenga un ancla fija.</p>
+    </div>
+    <span class="eyebrow">Rutina de bajada · esta noche</span>
+    <div id="sleepList"></div>
+    <div class="add-row">
+      <input id="sleepInput" type="text" placeholder="Añadir paso a la rutina…" maxlength="60">
+      <button data-act="addSleepItem" aria-label="Añadir paso"><svg class="ic big" aria-hidden="true"><use href="#i-plus"></use></svg></button>
+    </div>
+    <span class="eyebrow" style="margin-top:16px;">Técnicas — 🟢 respaldado · 🟡 comunidad</span>
+    <div id="sleepTech"></div>
+  </section>
+
+  <!-- ============ FRASES ============ -->
+  <section class="tab-panel" tabindex="-1" id="tab-frases">
+    <div class="quote-day">
+      <span class="qd-label">Frase del día</span>
+      <div class="qd-text" id="dayQuote"></div>
+      <button class="qd-shuffle" data-act="shuffleQuote" aria-label="Otra frase">🔀</button>
+    </div>
+    <span class="eyebrow">Todas · <svg class="ic fill" aria-hidden="true"><use href="#i-star"></use></svg> favorita (la frase del día sale de tus favoritas)</span>
+    <div id="quoteList"></div>
+    <div class="add-row">
+      <input id="quoteInput" type="text" placeholder="Añadir una frase tuya…" maxlength="200">
+      <button data-act="addQuote" aria-label="Añadir frase"><svg class="ic big" aria-hidden="true"><use href="#i-plus"></use></svg></button>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <h3>Hazla tuya</h3>
+      <p>Borra las que no te digan nada; esta pestaña solo vale si cada frase te habla a ti.</p>
+    </div>
+  </section>
+
+  <!-- ============ CUERPO ============ -->
+  <section class="tab-panel" tabindex="-1" id="tab-cuerpo">
+    <div class="card">
+      <span class="card-lead">Interocepción</span>
+      <p><strong>Tu salpicadero interno.</strong> Las señales del cuerpo (hambre, sed, calor, tensión) llegan borrosas o tarde; si no se atienden, desregulan sin avisar. Como la señal no salta sola, la sustituimos por chequeos a horas fijas.</p>
+    </div>
+    <span class="eyebrow">Chequeos programados · hoy</span>
+    <div class="card">
+      <p style="margin-bottom:10px;">Pon 3 alarmas en el móvil (por ejemplo 11:00, 17:00, 21:00). Cuando suene: 30 segundos de chequeo corporal abajo, y marca la casilla.</p>
+      <div class="slot-check" id="slotCheck"></div>
+    </div>
+    <span class="eyebrow">Chequeo corporal (interocepción)</span>
+    <div class="card" style="padding-bottom:10px;">
+      <p style="margin-bottom:10px;">Toca lo que notes ahora mismo. Las necesidades sin cubrir desregulan sin avisar.</p>
+      <div class="body-check" id="bodyCheck"></div>
+      <div class="card" id="bodyResult" style="background:var(--surface2);"></div>
+    </div>
+    <span class="eyebrow">Propiocepción — el sentido del propio cuerpo</span>
+    <div class="card">
+      <span class="pill teal">Qué es</span>
+      <h3>Saber dónde está tu cuerpo sin mirar</h3>
+      <p>Es el sentido que informa de la posición de cada parte del cuerpo y de cuánta fuerza haces: por eso puedes tocarte la nariz con los ojos cerrados o coger un huevo sin romperlo. Los receptores están en músculos y articulaciones.</p>
+    </div>
+    <div class="card">
+      <span class="pill prac">🟠 Práctica clínica</span>
+      <h3>Trabajo pesado (entrada propioceptiva)</h3>
+      <p>Empujar una pared 10 segundos, cargar la compra, flexiones, ejercicio con resistencia, subir escaleras con la mochila. En terapia ocupacional se usa como entrada que calma y organiza el sistema nervioso, y es de las pocas a las que casi nadie es hipersensible. Sin ensayos tipo Baylor detrás: es práctica profesional asentada, no estudio controlado.</p>
+    </div>
+    <div class="card">
+      <span class="pill amber">🟡 Regla del chicle</span>
+      <h3>Pruébalo en calma primero</h3>
+      <p>La literatura de terapia ocupacional avisa: estas sensaciones pueden calmar o activar según cada sistema nervioso. Prueba cada técnica un día tranquilo; si te acelera (como el chicle), fuera. Ya tienes verificada la que sí funciona en tu caso base: la presión profunda.</p>
+    </div>
+  </section>
+
+  <!-- ============ REGISTRO ============ -->
+  <section class="tab-panel" tabindex="-1" id="tab-registro">
+    <span class="eyebrow">Registro de días</span>
+    <div class="card">
+      <div class="cal-head">
+        <button data-act="calMove" data-arg="-1" aria-label="Mes anterior"><svg class="ic big" aria-hidden="true"><use href="#i-prev"></use></svg></button>
+        <h3 id="calTitle"></h3>
+        <button data-act="calMove" data-arg="1" aria-label="Mes siguiente"><svg class="ic big" aria-hidden="true"><use href="#i-next"></use></svg></button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-summary" id="calSummary"></div>
+      <!-- v34: solo se ve al imprimir; lo rellena renderCal -->
+      <div id="printNotas" style="display:none;"></div>
+      <div class="cal-legend">
+        Toca un día para elegir su estado (el color de fondo) y apuntar una nota corta.<br>
+        Punto rojo: usaste SOS. Punto ámbar: hay nota. Las 3 rayitas de abajo son los chequeos corporales (mañana · tarde · noche).
+      </div>
+    </div>
+    <span class="eyebrow">Nube — sincronizar entre dispositivos</span>
+    <div class="card" id="cloudCard"></div>
+    <span class="eyebrow">Diagnóstico de guardado</span>
+    <div class="card" id="diagCard"></div>
+    <span class="eyebrow">Copia de seguridad</span>
+    <div class="card">
+      <div id="bkNote"></div>
+      <p>Genera una copia y guárdala donde quieras: <strong>Descargar</strong> la deja como archivo con la fecha en el nombre, <strong>Copiar</strong> la pasa al portapapeles. Para restaurar, pega una copia en el cuadro e importa.</p>
+      <textarea id="backupTA" placeholder="Aquí aparecerá tu copia, o pega una para importarla." spellcheck="false"></textarea>
+      <div class="bk-row">
+        <button data-act="genBackup">Generar copia</button>
+        <button data-act="copyBackup">Copiar</button>
+        <button data-act="downloadBackup">Descargar</button>
+      </div>
+      <div class="bk-row" style="margin-top:8px;">
+        <button class="accent" data-act="importBackup">Importar lo pegado</button>
+        <button data-act="pedirArchivo">Importar archivo</button>
+      </div>
+      <input type="file" id="bkFile" accept="application/json,.json" style="display:none;" data-chg="leerArchivo" data-chg-el="1">
+    </div>
+    <span class="eyebrow">Sacar el registro fuera de la app</span>
+    <div class="card" id="expCard">
+      <p>La copia de arriba sirve para <strong>restaurar</strong>; esto sirve para <strong>leer</strong>. El CSV se abre en una hoja de cálculo y el Markdown se lee o se imprime. Ninguno de los dos se puede volver a importar.</p>
+      <div class="bk-row">
+        <button data-act="exportCSV">Descargar CSV</button>
+        <button data-act="exportMD">Descargar Markdown</button>
+        <button data-act="imprimirRegistro">Imprimir el mes</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- SOS -->
+<button id="sosBtn" data-act="goSOS" aria-label="SOS: ir a ayuda inmediata">SOS</button>
+
+<!-- bottom nav -->
+<nav class="tabs">
+  <button data-tab="ahora"    data-act="setTab" data-arg="ahora" aria-label="Ahora"><span class="ico">🆘</span><span class="lbl">Ahora</span></button>
+  <button data-tab="despues"  data-act="setTab" data-arg="despues" aria-label="Después"><span class="ico">🔋</span><span class="lbl">Después</span></button>
+  <button data-tab="kit"      data-act="setTab" data-arg="kit" aria-label="Kit"><span class="ico">🧳</span><span class="lbl">Kit</span></button>
+  <button data-tab="bucle"    data-act="setTab" data-arg="bucle" aria-label="Bucle"><span class="ico">🌀</span><span class="lbl">Bucle</span></button>
+  <button data-tab="sueno"    data-act="setTab" data-arg="sueno" aria-label="Sueño"><span class="ico">😴</span><span class="lbl">Sueño</span></button>
+  <button data-tab="frases"   data-act="setTab" data-arg="frases" aria-label="Frases"><span class="ico">💬</span><span class="lbl">Frases</span></button>
+  <button data-tab="cuerpo"   data-act="setTab" data-arg="cuerpo" aria-label="Cuerpo"><span class="ico">🫀</span><span class="lbl">Cuerpo</span></button>
+  <button data-tab="registro" data-act="setTab" data-arg="registro" aria-label="Registro"><span class="ico">📊</span><span class="lbl">Registro</span></button>
+</nav>
+
+<!-- selector de estado del día -->
+<div id="moodPick" data-act="cerrarSiFondo">
+  <div class="sheet">
+    <h3 id="moodPickTitle">¿Cómo fue el día?</h3>
+    <div class="opts" id="moodOpts"></div>
+    <textarea id="dayNote" class="noteIn" placeholder="Nota corta: qué pasó ese día (opcional)" maxlength="120" rows="2" aria-label="Nota del día"></textarea>
+    <div class="pick-actions"><button data-act="saveDayNote">Guardar</button></div>
+  </div>
+</div>
+
+<!-- overlay: step-through -->
+<div class="overlay" id="stepsOverlay">
+  <div class="ov-head">
+    <h2 id="stepsTitle"></h2>
+    <button class="ov-close" data-act="closeSteps">Cerrar <svg class="ic" aria-hidden="true"><use href="#i-close"></use></svg></button>
+  </div>
+  <div class="step-body">
+    <div class="step-count" id="stepCount"></div>
+    <div class="step-ico" id="stepIco"></div>
+    <div class="step-title" id="stepTitle"></div>
+    <div class="step-text" id="stepText"></div>
+    <div class="step-timer mono" id="stepTimer" style="display:none;"></div>
+  </div>
+  <div class="ov-actions">
+    <button class="btn" id="stepBack" data-act="stepMove" data-arg="-1">Atrás</button>
+    <button class="btn primary" id="stepNext" data-act="stepMove" data-arg="1">Siguiente</button>
+  </div>
+</div>
+
+<!-- overlay: respiración -->
+<div class="overlay" id="breathOverlay">
+  <div class="ov-head">
+    <h2>Respirar 4-7-8</h2>
+    <button class="ov-close" data-act="closeBreath">Cerrar <svg class="ic" aria-hidden="true"><use href="#i-close"></use></svg></button>
+  </div>
+  <div id="breathWrap">
+    <div id="breathCircle"><span id="breathCount" class="mono"></span></div>
+    <div id="breathPhase">Cuando quieras, pulsa empezar</div>
+    <div id="breathCycles"></div>
+    <div class="breath-note" id="breathVibNote"></div>
+  </div>
+  <div class="ov-actions">
+    <button class="btn warm" id="breathBtn" data-act="toggleBreath">Empezar</button>
+  </div>
+</div>
+
+<div id="undoBar" role="status" aria-live="polite"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =================== adaptador de almacenamiento =================== */
+/* Dentro de Claude existe window.storage (ligado a tu cuenta: se comparte entre tus
+   dispositivos). Fuera de Claude no existe: usamos localStorage del navegador, que
+   es LOCAL a cada dispositivo. El puente entre almacenes es Exportar/Importar. */
+(function(){
+  if(window.storage) return; // entorno Claude: no tocar nada
+  var PRE='calma:';
+  var ls=null;
+  try{ ls=window.localStorage; ls.setItem(PRE+'__t','1'); ls.removeItem(PRE+'__t'); }catch(e){ ls=null; }
+  if(ls){
+    window.storage={
+      get:function(k){ var v=ls.getItem(PRE+k); return Promise.resolve(v===null?null:{key:k,value:v}); },
+      set:function(k,v){ try{ ls.setItem(PRE+k,String(v)); return Promise.resolve({key:k,value:v}); }catch(e){ return Promise.reject(e); } },
+      delete:function(k){ ls.removeItem(PRE+k); return Promise.resolve({key:k,deleted:true}); },
+      list:function(pfx){ var keys=[]; for(var i=0;i<ls.length;i++){ var kk=ls.key(i); if(kk&&kk.indexOf(PRE+(pfx||''))===0) keys.push(kk.slice(PRE.length)); } return Promise.resolve({keys:keys}); }
+    };
+    window.__storageBackend='localStorage';
+  }else{
+    // último recurso: memoria de la sesión (sin persistencia); la app avisa al guardar
+    var mem={};
+    window.storage={
+      get:function(k){ return Promise.resolve(k in mem?{key:k,value:mem[k]}:null); },
+      set:function(k,v){ mem[k]=String(v); return Promise.resolve({key:k,value:v}); },
+      delete:function(k){ delete mem[k]; return Promise.resolve({key:k,deleted:true}); },
+      list:function(){ return Promise.resolve({keys:Object.keys(mem)}); }
+    };
+    window.__storageBackend='memoria';
+  }
+})();
+/* v27: la version vive AQUI y en un solo sitio. Se le pasa al service worker
+   por la URL, asi que sw.js ya no lleva el numero escrito dentro: lo lee de
+   ?v=. Cambiar APP_VERSION basta para que el navegador vea un sw.js distinto,
+   lo reinstale y estrene cache. Se acabo el olvido de subirlo a mano. */
+const APP_VERSION = 'v44';
+if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+  try{ navigator.serviceWorker.register('sw.js?v='+APP_VERSION); }catch(e){}
+}
+
+/* =================== helpers de color (rueda-color v57, copiados tal cual) =================== */
+function rgbOf(hex){var n=parseInt(hex.slice(1),16);return{r:n>>16,g:(n>>8)&255,b:n&255};}
+function toHex(x){return x.toString(16).padStart(2,'0');}
+function hslOf(hex){var c=rgbOf(hex),r=c.r/255,g=c.g/255,b=c.b/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),h,s,l=(mx+mn)/2;
+ if(mx===mn){h=s=0;}else{var d=mx-mn;s=l>0.5?d/(2-mx-mn):d/(mx+mn);
+  if(mx===r)h=(g-b)/d+(g<b?6:0);else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h/=6;}
+ return{h:Math.round(h*360),s:Math.round(s*100),l:Math.round(l*100)};}
+function hslToHex(h,s,l){s/=100;l/=100;var k=function(n){return (n+h/30)%12;},a=s*Math.min(l,1-l),
+ f=function(n){var x=l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));return Math.round(255*x);};
+ return '#'+toHex(f(0))+toHex(f(8))+toHex(f(4));}
+function relLum(hex){var c=rgbOf(hex);function ch(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);}return 0.2126*ch(c.r)+0.7152*ch(c.g)+0.0722*ch(c.b);}
+function contrastRatio(a,b){var x=relLum(a),y=relLum(b),hi=Math.max(x,y),lo=Math.min(x,y);return (hi+0.05)/(lo+0.05);}
+function normHex(v){v=(v||'').trim();if(/^#?[0-9a-fA-F]{3}$/.test(v)){v=v.replace('#','');v=v[0]+v[0]+v[1]+v[1]+v[2]+v[2];}if(/^#?[0-9a-fA-F]{6}$/.test(v))return ('#'+v.replace('#','')).toUpperCase();return null;}
+function $(s){return document.querySelector(s);}
+
+/* =================== sistema de temas (rueda-color v57) =================== */
+var THEME_KEY='calma_theme_v1';
+var THEME={mode:'auto',dark:'#0E1116',light:'#F3F4F7',hc:false,ts:1,
+           accMode:'analog',accDark:'#4FD1C5',accLight:'#0B7C71',anim:true,animMs:180};
+
+/* ---- v23: constantes de la paleta derivada. Para revertir un comportamiento
+   basta con tocar el numero de aqui, sin deshacer codigo. ----
+   MIN_SURF_RATIO: separacion minima de contraste entre --bg y --surface.
+     1.00 = comportamiento anterior (+4 de luminosidad y nada mas).
+   ACC_ANALOG_DEG: el fondo por defecto #0E1116 tiene tono 217 y el teal
+     historico de la app tono 174; -40 reproduce ese teal casi exacto.
+   ACC_S_*: saturacion del acento derivado (alta, para que destaque).
+   ACC_FALLBACK_*: red de seguridad si en 80 pasos no se cumple el contraste. */
+/* v30: duracion de todas las animaciones. Por encima de 200 ms dejan de
+   sentirse como respuesta y empiezan a sentirse como lentitud. */
+var ANIM_MS=180;                 /* valor por defecto */
+var ANIM_STEPS=[120,180,260];    /* rapida, normal, lenta */
+var ANIM_LABELS={120:'Rápida',180:'Normal',260:'Lenta'};
+var MIN_SURF_RATIO=1.15;
+var MAX_SURF_DL=12;
+var ACC_ANALOG_DEG=-40;
+var ACC_S_DARK=62, ACC_S_LIGHT=70;
+var ACC_S_MONO_DARK=10, ACC_S_MONO_LIGHT=12;
+var ACC_L_START_DARK=60, ACC_L_START_LIGHT=42;
+var ACC_FALLBACK_DARK='#4FD1C5', ACC_FALLBACK_LIGHT='#0B7C71';
+/* El acento busca primero ACC_TARGET_PREF (7:1, nivel AAA). Solo si con ese
+   tono no hay ningun color que lo cumpla, baja a ACC_TARGET_MIN (4.5:1, AA).
+   Para volver al comportamiento anterior: ACC_TARGET_PREF=4.5. */
+var ACC_TARGET_PREF=7, ACC_TARGET_MIN=4.5;
+var ACC_MODES=['same','comp','analog','mono','custom'];
+var DARK_PRESETS=[
+ {es:'Negro azabache',hex:'#0E1116'},
+ {es:'Azul medianoche',hex:'#101A30'},
+ {es:'Gris oscuro',hex:'#17191E'},
+ {es:'Verde abeto',hex:'#0D1A16'},
+ {es:'Berenjena',hex:'#191024'},
+ {es:'Café',hex:'#1A1410'}
+];
+var LIGHT_PRESETS=[
+ {es:'Gris perla',hex:'#F3F4F7'},
+ {es:'Blanco puro',hex:'#FFFFFF'},
+ {es:'Crema',hex:'#FAF5EA'},
+ {es:'Sepia',hex:'#F3ECDC'},
+ {es:'Azul hielo',hex:'#EDF2FA'},
+ {es:'Salvia clara',hex:'#EEF4EE'}
+];
+function clampDarkBase(hex){var h=hslOf(hex);return hslToHex(h.h,Math.min(h.s,55),Math.min(h.l,16));}
+function clampLightBase(hex){var h=hslOf(hex);return hslToHex(h.h,Math.min(h.s,42),Math.max(h.l,86));}
+function shiftL(hex,dl){var h=hslOf(hex);return hslToHex(h.h,h.s,Math.max(0,Math.min(100,h.l+dl)));}
+function hexToRgba(hex,a){var c=rgbOf(hex);return 'rgba('+c.r+','+c.g+','+c.b+','+a+')';}
+
+/* ---- v23: separacion minima entre fondo y tarjeta ----
+   En bases muy oscuras un +4 de luminosidad apenas se ve, porque cerca del
+   negro la formula del contraste (L+0.05) casi no se mueve. Aqui subimos de
+   uno en uno hasta llegar a MIN_SURF_RATIO, con tope en MAX_SURF_DL. */
+function surfaceFor(base,dark){
+ var start=dark?4:6,hex=shiftL(base,start),dl,alt;
+ if(MIN_SURF_RATIO<=1)return hex;          /* 1.00 = comportamiento anterior */
+ for(dl=start;dl<=MAX_SURF_DL;dl++){
+  hex=shiftL(base,dl);
+  if(contrastRatio(hex,base)>=MIN_SURF_RATIO)return hex;
+ }
+ /* Techo: con un fondo casi blanco no se puede aclarar mas, asi que la
+    tarjeta se oscurece en vez de aclararse. */
+ for(dl=start;dl<=MAX_SURF_DL;dl++){
+  alt=shiftL(base,-dl);
+  if(contrastRatio(alt,base)>=MIN_SURF_RATIO)return alt;
+ }
+ return hex;
+}
+
+/* ---- v23: acento derivado del fondo ----
+   El acento no es solo texto: tambien es fondo de boton (.btn.primary y las
+   casillas marcadas), con texto #0B0E14 en oscuro y #fff en claro. Por eso
+   tiene que cumplir 4.5:1 contra TRES cosas a la vez: --bg, --surface y el
+   texto que se le pone encima. Mismo patron iterativo que mutedFor. */
+/* Un fondo neutro (blanco puro, gris) tiene saturacion ~0 y su tono es 0, es
+   decir rojo por accidente, no por eleccion. En ese caso usamos el tono del
+   fondo historico de la app (217) para que los tres chips se comporten igual
+   que con el fondo por defecto. */
+var ACC_NEUTRAL_S=5, ACC_NEUTRAL_HUE=217;
+function accentHue(baseHue,mode){
+ var h=baseHue;
+ if(mode==='comp')h=baseHue+180;
+ else if(mode==='analog')h=baseHue+ACC_ANALOG_DEG;
+ h=h%360; if(h<0)h+=360;
+ return h;
+}
+function accentTry(h,s,dark,base,surf,over,target){
+ var l=dark?ACC_L_START_DARK:ACC_L_START_LIGHT;
+ var step=dark?2:-2,hex='';
+ for(var i=0;i<80;i++){
+  hex=hslToHex(h,s,Math.max(0,Math.min(100,l)));
+  if(contrastRatio(hex,base)>=target&&contrastRatio(hex,surf)>=target&&contrastRatio(hex,over)>=target)return hex;
+  l+=step;
+  if(l<0||l>100)break;
+ }
+ return null;
+}
+function accentFor(base,dark,mode,custom){
+ if(mode==='custom'){var c=normHex(custom);if(c)return c;}
+ var surf=surfaceFor(base,dark);
+ var over=dark?'#0B0E14':'#FFFFFF';
+ var bh=hslOf(base);
+ var h=accentHue(bh.s<ACC_NEUTRAL_S?ACC_NEUTRAL_HUE:bh.h,mode);
+ var s=(mode==='mono')?(dark?ACC_S_MONO_DARK:ACC_S_MONO_LIGHT):(dark?ACC_S_DARK:ACC_S_LIGHT);
+ return accentTry(h,s,dark,base,surf,over,ACC_TARGET_PREF)
+     || accentTry(h,s,dark,base,surf,over,ACC_TARGET_MIN)
+     || (dark?ACC_FALLBACK_DARK:ACC_FALLBACK_LIGHT);
+}
+function sysDark(){
+ if(window.matchMedia){try{return window.matchMedia('(prefers-color-scheme: dark)').matches;}catch(e){}}
+ return true;
+}
+function effMode(){return THEME.mode==='auto'?(sysDark()?'dark':'light'):THEME.mode;}
+function faintFor(base,dark){
+ var worst=dark?shiftL(base,4):shiftL(base,-3);
+ var c=rgbOf(dark?'#788395':'#626B79'),step=dark?2:-2,hex='';
+ for(var i=0;i<80;i++){
+  hex='#'+[c.r,c.g,c.b].map(function(v){return toHex(Math.max(0,Math.min(255,v)));}).join('');
+  if(contrastRatio(hex,worst)>=4.5&&contrastRatio(hex,base)>=4.5)return hex;
+  c.r+=step;c.g+=step;c.b+=step;
+ }
+ return dark?'#C7D0DC':'#333C49';
+}
+function mutedFor(base,dark){
+ var worst=dark?shiftL(base,4):shiftL(base,-3);
+ var c=rgbOf(dark?'#9AA4B4':'#5A6472'),step=dark?2:-2,hex='';
+ for(var i=0;i<80;i++){
+  hex='#'+[c.r,c.g,c.b].map(function(v){return toHex(Math.max(0,Math.min(255,v)));}).join('');
+  if(contrastRatio(hex,worst)>=4.5&&contrastRatio(hex,base)>=4.5)return hex;
+  c.r+=step;c.g+=step;c.b+=step;
+ }
+ return dark?'#C7D0DC':'#333C49';
+}
+function applyTheme(){
+  document.documentElement.classList.toggle('noanim',!THEME.anim);
+  document.documentElement.style.setProperty('--anim',(THEME.animMs||ANIM_MS)+'ms');
+ var rt=document.documentElement,st=rt.style,mt=document.querySelector('meta[name="theme-color"]');
+ if(effMode()==='light'){
+  rt.classList.add('light');
+  var lb=clampLightBase(THEME.light||'#F3F4F7');
+  st.setProperty('--bg',lb);
+  st.setProperty('--surface',surfaceFor(lb,false));st.setProperty('--surface2',shiftL(lb,-3));
+  st.setProperty('--line','rgba(15,23,42,.08)');st.setProperty('--line2','rgba(15,23,42,.18)');
+  var accL=accentFor(lb,false,THEME.accMode,THEME.accLight);
+  st.setProperty('--teal',accL);st.setProperty('--teal-dim',hexToRgba(accL,0.10));
+  st.setProperty('--txt','#1B2430');st.setProperty('--muted',mutedFor(lb,false));st.setProperty('--faint',faintFor(lb,false));
+  st.setProperty('--glow',shiftL(lb,5));st.setProperty('--peekbg',hexToRgba(shiftL(lb,6),0.97));
+  if(mt)mt.setAttribute('content',lb);
+ }else{
+  rt.classList.remove('light');
+  var bg=clampDarkBase(THEME.dark||'#0E1116');
+  st.setProperty('--bg',bg);
+  var surfD=surfaceFor(bg,true);
+  st.setProperty('--surface',surfD);st.setProperty('--surface2',shiftL(bg,2));
+  st.setProperty('--line','rgba(255,255,255,.08)');st.setProperty('--line2','rgba(255,255,255,.15)');
+  var accD=accentFor(bg,true,THEME.accMode,THEME.accDark);
+  st.setProperty('--teal',accD);st.setProperty('--teal-dim',hexToRgba(accD,0.14));
+  st.setProperty('--txt','#EAEEF5');st.setProperty('--muted',mutedFor(bg,true));st.setProperty('--faint',faintFor(bg,true));
+  st.setProperty('--glow',shiftL(bg,6));st.setProperty('--peekbg',hexToRgba(shiftL(bg,3),0.96));
+  if(mt)mt.setAttribute('content',bg);
+ }
+ if(THEME.hc){
+  rt.classList.add('hc');
+  if(effMode()==='light'){
+   st.setProperty('--line','rgba(15,23,42,.35)');st.setProperty('--line2','rgba(15,23,42,.65)');
+   st.setProperty('--txt','#000000');st.setProperty('--muted','#333C49');st.setProperty('--faint','#4A5462');
+  }else{
+   st.setProperty('--line','rgba(255,255,255,.3)');st.setProperty('--line2','rgba(255,255,255,.6)');
+   st.setProperty('--txt','#FFFFFF');st.setProperty('--muted','#C7D0DC');st.setProperty('--faint','#9AA4B4');
+  }
+ }else rt.classList.remove('hc');
+ if(document.body)document.body.style.zoom=(THEME.ts&&THEME.ts!==1)?THEME.ts:'';
+ renderThemePop();
+}
+if(window.matchMedia){
+ try{
+  var _mq=window.matchMedia('(prefers-color-scheme: dark)');
+  var _onSys=function(){if(THEME.mode==='auto')applyTheme();};
+  if(_mq.addEventListener)_mq.addEventListener('change',_onSys);
+  else if(_mq.addListener)_mq.addListener(_onSys);
+ }catch(e){}
+}
+var _lastThemeJSON='';
+/* v43: el tema tiene su propia clave, asi que necesita su propia guarda. Si no
+   se ha podido leer, escribir aqui sustituiria los ajustes buenos por los de
+   fabrica: el mismo fallo que el del estado, en pequeno. */
+var TEMA_LEIDO=false;
+function saveTheme(){
+  if(!TEMA_LEIDO) return;
+  try{
+    var j=JSON.stringify(THEME);
+    if(j===_lastThemeJSON) return;   // nada cambió: no gastamos una escritura
+    _lastThemeJSON=j;
+    window.storage.set(THEME_KEY,j);
+  }catch(e){}
+}
+function loadTheme(){return leerConReintentos(THEME_KEY).then(function(res){
+ if(!res.ok){ TEMA_LEIDO=false; return; }
+ TEMA_LEIDO=true;
+ var r=res.r;
+ if(!(r&&r.value)){
+  try{if(window.matchMedia&&matchMedia('(prefers-contrast: more)').matches)THEME.hc=true;}catch(e){}
+  return;
+ }
+ if(r&&r.value){var o=JSON.parse(r.value);
+  if(o&&(o.mode==='dark'||o.mode==='light'||o.mode==='auto'))THEME.mode=o.mode;
+  if(o&&o.dark&&normHex(o.dark))THEME.dark=normHex(o.dark);
+  if(o&&o.light&&normHex(o.light))THEME.light=normHex(o.light);
+  if(o)THEME.hc=!!o.hc;
+  if(o&&o.ts&&TS_STEPS.indexOf(o.ts)>=0)THEME.ts=o.ts;
+  /* v23: temas guardados antes del acento derivado no traen estos campos.
+     Se quedan con los valores por defecto ('analog' + el teal historico). */
+  if(o&&o.accMode&&ACC_MODES.indexOf(o.accMode)>=0)THEME.accMode=o.accMode;
+  if(o&&o.accDark&&normHex(o.accDark))THEME.accDark=normHex(o.accDark);
+  if(o&&o.accLight&&normHex(o.accLight))THEME.accLight=normHex(o.accLight);
+  if(o&&typeof o.anim==='boolean')THEME.anim=o.anim;
+  if(o&&ANIM_STEPS.indexOf(o.animMs)>=0)THEME.animMs=o.animMs;
+ }
+}).catch(function(){});}
+window.setThemeMode=function(m){THEME.mode=m;saveTheme();applyTheme();};
+window.setThemeDark=function(hex){var h=normHex(hex);if(!h)return;THEME.dark=h;if(THEME.mode!=='auto')THEME.mode='dark';saveTheme();applyTheme();};
+window.setThemeLight=function(hex){var h=normHex(hex);if(!h)return;THEME.light=h;if(THEME.mode!=='auto')THEME.mode='light';saveTheme();applyTheme();};
+window.toggleHC=function(){THEME.hc=!THEME.hc;saveTheme();applyTheme();};
+window.setAccMode=function(m){if(ACC_MODES.indexOf(m)<0)return;THEME.accMode=m;saveTheme();applyTheme();};
+window.setAccColor=function(hex){
+ var h=normHex(hex);if(!h)return;
+ if(effMode()==='light')THEME.accLight=h;else THEME.accDark=h;
+ THEME.accMode='custom';saveTheme();applyTheme();
+};
+window.thTogglePeek=function(){thPeek=!thPeek;renderThemePop();};
+var TS_STEPS=[0.9,1,1.1,1.25];
+window.setTS=function(d){
+ if(d===0)THEME.ts=1;
+ else{var i=TS_STEPS.indexOf(THEME.ts||1);if(i<0)i=1;i=Math.max(0,Math.min(TS_STEPS.length-1,i+d));THEME.ts=TS_STEPS[i];}
+ saveTheme();applyTheme();
+};
+window.toggleThemePop=function(){var el=$('#themePop');el.classList.toggle('hidden');var open=!el.classList.contains('hidden');var b=$('#themeBtn');if(b)b.setAttribute('aria-expanded',open?'true':'false');if(open)renderThemePop();};
+function thSwRow(presets,curRaw,fn){
+ return presets.map(function(pp){
+  var on=curRaw===pp.hex.toUpperCase();
+  return '<button class="thsw'+(on?' on':'')+'" style="background:'+pp.hex+'" title="'+pp.es+'" aria-label="'+pp.es+'" data-act="'+fn+'" data-arg="'+pp.hex+'"></button>';
+ }).join('');
+}
+function thCtLine(txt,bg,dim){
+ var r=contrastRatio(txt,bg),rs=(Math.round(r*10)/10).toFixed(1);
+ var lvl=r>=7?'AAA':(r>=4.5?'AA':'\u2717');
+ var cls=r>=7?'ok':(r>=4.5?'mid':'ko');
+ return '<div class="thct '+cls+dim+'"><span>Contraste del texto</span><b>'+rs+':1 \u00b7 '+lvl+'</b></div>';
+}
+/* v23: el panel solo muestra las opciones del tema que esta activo. En modo
+   Sistema se muestra el que el sistema esta usando ahora mismo, con un enlace
+   para abrir el otro sin cambiar de tema. */
+var thPeek=false;
+var ACC_LABELS={same:'Mismo',comp:'Opuesto',analog:'Análogo',mono:'Mono',custom:'Personal'};
+var ACC_TITLES={same:'Mismo tono que el fondo',comp:'Tono complementario, el opuesto del círculo',
+                analog:'Tono análogo, '+ACC_ANALOG_DEG+'° respecto al fondo',
+                mono:'Monocromático: el tono del fondo casi sin saturación',
+                custom:'Personalizado: lo eliges tú'};
+function thAccBlock(dark){
+ var base=dark?clampDarkBase(normHex(THEME.dark||'#0E1116')||'#0E1116')
+              :clampLightBase(normHex(THEME.light||'#F3F4F7')||'#F3F4F7');
+ var acc=accentFor(base,dark,THEME.accMode,dark?THEME.accDark:THEME.accLight).toUpperCase();
+ var chips=ACC_MODES.map(function(m){
+  /* la muestra enseña el color real que daría ese modo, así se elige viendo */
+  var prev=accentFor(base,dark,m,dark?THEME.accDark:THEME.accLight);
+  return '<button class="tchip accchip'+(THEME.accMode===m?' on':'')+'" title="'+ACC_TITLES[m]
+   +'" aria-label="'+ACC_TITLES[m]+'" aria-pressed="'+(THEME.accMode===m?'true':'false')
+   +'" data-act="setAccMode" data-arg="'+m+'"><span class="sw" style="background:'+prev+'"></span>'+ACC_LABELS[m]+'</button>';
+ }).join('');
+ var dimC=(THEME.accMode==='custom')?'':' thdim';
+ return '<div class="thlab" style="margin-top:12px">Acento</div>'
+  +'<div class="thsws" style="gap:6px">'+chips+'</div>'
+  +'<div class="thcustom'+dimC+'"><input type="color" value="'+acc+'" data-chg="setAccColor" aria-label="Color del acento a tu elección"><span>A tu elección</span><span class="thhex">'+acc+'</span></div>'
+  +thCtLine(acc,base,'');
+}
+function thBaseBlock(dark,withAcc){
+ var cur=dark?(normHex(THEME.dark||'#0E1116')||'#0E1116').toUpperCase()
+             :(normHex(THEME.light||'#F3F4F7')||'#F3F4F7').toUpperCase();
+ return '<div class="thlab">'+(dark?'Fondo oscuro':'Fondo claro')+'</div>'
+  +'<div class="thsws">'+thSwRow(dark?DARK_PRESETS:LIGHT_PRESETS,cur,dark?'setThemeDark':'setThemeLight')+'</div>'
+  +'<div class="thcustom"><input type="color" value="'+cur+'" data-chg="'+(dark?'setThemeDark':'setThemeLight')+'" aria-label="'+(dark?'Color oscuro':'Color claro')+' a tu elección"><span>A tu elección</span><span class="thhex">'+cur+'</span></div>'
+  +thCtLine(dark?'#EAEEF5':'#1B2430',dark?clampDarkBase(cur):clampLightBase(cur),'')
+  +(withAcc?thAccBlock(dark):'');
+}
+function renderThemePop(){
+ var el=$('#themePop');if(!el||el.classList.contains('hidden'))return;
+ var chips='<div class="thmodes">'
+  +'<button class="tchip'+(THEME.mode==='light'?' on':'')+'" data-act="setThemeMode" data-arg="light"><span class="ico">\u2600\ufe0e</span><span>Claro</span></button>'
+  +'<button class="tchip'+(THEME.mode==='dark'?' on':'')+'" data-act="setThemeMode" data-arg="dark"><span class="ico">\u263e\ufe0e</span><span>Oscuro</span></button>'
+  +'<button class="tchip'+(THEME.mode==='auto'?' on':'')+'" data-act="setThemeMode" data-arg="auto"><span class="ico">\u25d0</span><span>Sistema</span></button></div>';
+ var isDark=effMode()==='dark';
+ var otro=isDark?'claro':'oscuro';
+ var nota=(THEME.mode==='auto')
+   ? '<div class="thct" style="border-top:none;padding-top:0;margin:0 0 8px"><span>Tu sistema está en '+(isDark?'oscuro':'claro')+'</span></div>'
+   : '';
+ el.innerHTML=chips+nota
+  +thBaseBlock(isDark,true)
+  +'<button class="diag-toggle" style="margin-top:10px" aria-expanded="'+(thPeek?'true':'false')+'" data-act="thTogglePeek">'
+  +(thPeek?'▾ Ocultar el tema '+otro:'▸ Ver el tema '+otro)+'</button>'
+  +(thPeek?('<div style="height:8px"></div>'+thBaseBlock(!isDark,false)):'')
+  +'<div class="thlab" style="margin-top:12px">Accesibilidad</div>'
+  +'<div class="thmodes" style="margin-bottom:10px">'
+  +'<button class="tchip'+(THEME.hc?' on':'')+'" aria-pressed="'+(THEME.hc?'true':'false')+'" data-act="toggleHC">Alto contraste</button>'
+  +'<button class="tchip'+(THEME.anim?' on':'')+'" aria-pressed="'+(THEME.anim?'true':'false')+'" data-act="toggleAnim">Animaciones</button>'
+  +'</div>'
+  +'<div class="thcustom"><span>Tamaño del texto</span><span style="margin-left:auto;display:flex;gap:6px;align-items:center"><button class="mini" data-act="setTS" data-arg="-1">A\u2212</button><button class="mini" data-act="setTS" data-arg="0">A</button><button class="mini" data-act="setTS" data-arg="1">A+</button><span class="thhex" style="margin-left:4px">'+Math.round((THEME.ts||1)*100)+'%</span></span></div>'
+  /* v32: la velocidad va justo debajo del tamaño de texto. Si las animaciones
+     están apagadas, la fila se atenúa: sigue ahí, pero no engaña. */
+  +'<div class="thcustom'+(THEME.anim?'':' thdim')+'" style="margin-top:10px"><span>Velocidad</span>'
+  +'<span style="margin-left:auto;display:flex;gap:6px;align-items:center">'
+  + ANIM_STEPS.map(function(ms){
+      var on=(THEME.animMs||ANIM_MS)===ms;
+      return '<button class="mini'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')
+        +'" aria-label="Animaciones '+ANIM_LABELS[ms]+'" data-act="setAnimMs" data-arg="'+ms+'">'+ANIM_LABELS[ms]+'</button>';
+    }).join('')
+  +'</span></div>';
+}
+document.addEventListener('click',function(e){
+ var wrp=$('#themeWrap');
+ if(wrp&&!wrp.contains(e.target))$('#themePop').classList.add('hidden');
+});
+
+/* ============================================================
+   MÓDULO NUBE v1 — sincronización entre dispositivos (Supabase)
+   Portable: pégalo en cualquier app y cambia solo CLOUD_CFG.appId
+   Requiere: window.storage (el adaptador) y las funciones
+   getState() / setState() que cada app define abajo del módulo.
+   ============================================================ */
+const CLOUD_CFG = {
+  url:     'https://tyfqmnfcmbljfginqebc.supabase.co',          // ← pega aquí tu Project URL de Supabase
+  anonKey: 'sb_publishable_ZnVZTzFrOf7q72AAWSqdNw_AbUa5wze',          // ← pega aquí tu clave anon/public
+  appId:   'calma'      // ← identificador ÚNICO de esta app
+};
+
+const CLOUD = { session:null, meta:{lastLocalChange:0, lastSyncedAt:0, lastRemoteUpdatedAt:0}, busy:false, status:'off' };
+const SESS_KEY = CLOUD_CFG.appId + '-cloud-session';
+const META_KEY = CLOUD_CFG.appId + '-sync-meta';
+
+function cloudConfigured(){ return !!(CLOUD_CFG.url && CLOUD_CFG.anonKey); }
+
+/* ---------- decisión de sincronización (pura, testeable) ---------- */
+function decideSync(meta, remote){
+  const localChanged = meta.lastLocalChange > meta.lastSyncedAt;
+  if(!remote) return localChanged || meta.lastSyncedAt===0 ? 'push' : 'none';
+  /* v41: «distinto de lo ultimo que vi», NO «mas nuevo». La marca updated_at
+     la pone el CLIENTE, asi que un reloj adelantado la infla: el aparato
+     desfasado subia con marca 100, el otro editaba y subia con la suya (90), y
+     al comparar 90 > 100 este creia que la nube no habia cambiado y pisaba el
+     cambio ajeno en silencio. lastRemoteUpdatedAt guarda exactamente el valor
+     que ESTE aparato vio en su ultimo pull o escribio en su ultimo push: si el
+     de la nube es OTRO, ha escrito alguien mas, diga lo que diga su reloj. */
+  const remoteChanged = remote.updated_ms !== meta.lastRemoteUpdatedAt;
+  if(remoteChanged && localChanged) return 'conflict';
+  if(remoteChanged) return 'pull';
+  if(localChanged) return 'push';
+  return 'none';
+}
+
+/* ---------- REST ---------- */
+async function api(path, opts){
+  const o = opts || {};
+  const headers = Object.assign({'apikey':CLOUD_CFG.anonKey,'Content-Type':'application/json'}, o.headers||{});
+  if(CLOUD.session && CLOUD.session.access_token && !o.noAuth) headers['Authorization']='Bearer '+CLOUD.session.access_token;
+  const res = await fetch(CLOUD_CFG.url.replace(/\/+$/,'') + path, {method:o.method||'GET', headers, body:o.body?JSON.stringify(o.body):undefined});
+  if(res.status===401 && !o.retried && CLOUD.session && CLOUD.session.refresh_token){
+    const ok = await refreshSession();
+    if(ok) return api(path, Object.assign({}, o, {retried:true}));
+  }
+  const txt = await res.text();
+  let data=null; try{ data = txt?JSON.parse(txt):null; }catch(e){ data = txt; }
+  if(!res.ok) throw new Error((data && (data.msg||data.message||data.error_description)) || ('HTTP '+res.status));
+  return data;
+}
+async function refreshSession(){
+  try{
+    const d = await api('/auth/v1/token?grant_type=refresh_token', {method:'POST', noAuth:true, body:{refresh_token:CLOUD.session.refresh_token}});
+    CLOUD.session = {access_token:d.access_token, refresh_token:d.refresh_token, email:(d.user&&d.user.email)||CLOUD.session.email, user_id:(d.user&&d.user.id)||CLOUD.session.user_id};
+    await window.storage.set(SESS_KEY, JSON.stringify(CLOUD.session));
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ---------- autenticación por correo y contraseña ----------
+   Se cambió el acceso por código de 6 dígitos (v12) por correo + contraseña:
+   los proyectos nuevos de plan gratuito de Supabase no pueden editar las
+   plantillas de correo, y sin eso el código nunca llega. Este flujo no
+   envía ningún correo. Requiere "Confirm email" desactivado en Supabase. */
+async function saveSession(d, email){
+  if(!d || !d.access_token) throw new Error('Supabase no devolvió sesión. Revisa que "Confirm email" esté desactivado.');
+  CLOUD.session = {access_token:d.access_token, refresh_token:d.refresh_token, email:(d.user&&d.user.email)||email, user_id:d.user&&d.user.id};
+  await window.storage.set(SESS_KEY, JSON.stringify(CLOUD.session));
+}
+async function cloudSignUp(email, password){
+  const d = await api('/auth/v1/signup', {method:'POST', noAuth:true, body:{email:email, password:password}});
+  await saveSession(d, email);
+}
+async function cloudSignIn(email, password){
+  const d = await api('/auth/v1/token?grant_type=password', {method:'POST', noAuth:true, body:{email:email, password:password}});
+  await saveSession(d, email);
+}
+async function cloudDisconnect(){
+  CLOUD.session=null; CLOUD.status='off';
+  try{ await window.storage.delete(SESS_KEY); }catch(e){}
+}
+
+/* ---------- datos ---------- */
+async function cloudFetchRemote(){
+  const rows = await api('/rest/v1/app_state?app_id=eq.'+encodeURIComponent(CLOUD_CFG.appId)+'&select=data,updated_at');
+  if(!rows || !rows.length) return null;
+  return {data:rows[0].data, updated_ms:Date.parse(rows[0].updated_at)||0, updated_at:rows[0].updated_at};
+}
+async function cloudPush(){
+  const now = new Date().toISOString();
+  await api('/rest/v1/app_state', {method:'POST',
+    headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:[{user_id:CLOUD.session.user_id, app_id:CLOUD_CFG.appId, data:getState(), updated_at:now}]});
+  const ms = Date.parse(now);
+  CLOUD.meta.lastSyncedAt = Date.now();
+  CLOUD.meta.lastRemoteUpdatedAt = ms;
+  await saveMeta(true);          // v39: nadie más va a escribir después
+}
+async function cloudPull(remote){
+  setState(remote.data);
+  CLOUD.meta.lastSyncedAt = Date.now();
+  CLOUD.meta.lastLocalChange = CLOUD.meta.lastSyncedAt;
+  CLOUD.meta.lastRemoteUpdatedAt = remote.updated_ms;
+  await saveMeta(true);          // v39: setState guardó ANTES de fijar la meta
+}
+/* La meta viaja DENTRO del estado de la app: así cada cambio provoca UNA sola
+   escritura, no dos. Evita agotar el límite de peticiones del almacenamiento.
+
+   v39 - EL FALLO QUE ESTO ARREGLA. Hasta la v38, saveMeta() solo tocaba S en
+   memoria y nunca escribía en el almacén. Desde markLocalChange() da igual,
+   porque save() escribe 900 ms después de todas formas. Pero cloudPush() y
+   cloudPull() NO van seguidos de ninguna escritura: sus marcas de tiempo se
+   perdían al recargar, cloudInit volvía a leer la meta vieja y el conflicto
+   reaparecía en CADA F5, aunque acabaras de resolverlo.
+   Por eso ahora persistir es un parámetro: false donde ya va a escribirse solo
+   (una escritura por cambio, como antes), true donde nadie más va a escribir.
+   Para revertir, llamar siempre sin argumento. */
+async function saveMeta(persistir){
+  try{
+    if(typeof S!=='object' || !S) return;
+    S.__sync = CLOUD.meta;
+    if(persistir) await writeState(1);   // writeState lleva reintentos y avisos
+  }catch(e){}
+}
+function markLocalChange(){ CLOUD.meta.lastLocalChange = Date.now(); saveMeta(); }
+
+/* ---------- orquestación ---------- */
+async function cloudSync(opts){
+  const o=opts||{};
+  if(!cloudConfigured() || !CLOUD.session || CLOUD.busy) return;
+  /* v42: sin lectura local, getState() devolveria los valores por defecto y un
+     push borraria los datos buenos TAMBIEN en la nube. */
+  if(!ESTADO_LEIDO) return;
+  CLOUD.busy=true; CLOUD.status='sync'; renderCloud();
+  try{
+    const remote = await cloudFetchRemote();
+    let action = decideSync(CLOUD.meta, remote);
+    if(o.force) action = o.force;
+    if(action==='conflict'){ CLOUD.status='conflict'; CLOUD.busy=false; showConflict(remote); return; }
+    if(action==='push') await cloudPush();
+    else if(action==='pull'){ await cloudPull(remote); renderAll(); }
+    CLOUD.status='ok';
+  }catch(e){
+    CLOUD.status='error'; CLOUD.lastError=e.message||String(e);
+  }
+  CLOUD.busy=false; renderCloud();
+}
+async function cloudInit(){
+  if(!cloudConfigured()) return;
+  try{ if(S && S.__sync) CLOUD.meta=Object.assign(CLOUD.meta, S.__sync); }catch(e){}
+  try{ const s=await window.storage.get(SESS_KEY); if(s&&s.value){ CLOUD.session=JSON.parse(s.value); CLOUD.status='idle'; } }catch(e){}
+  renderCloud();
+  /* v42: el aviso de lectura se pinta ANTES de saber si hay sesion, asi que le
+     falta el boton de la nube. Aqui ya se sabe: se repinta. */
+  if(!ESTADO_LEIDO) mostrarAvisoLectura();
+  if(CLOUD.session) cloudSync();
+}
+
+/* ---------- puentes de la app con el módulo ---------- */
+function getState(){
+  /* __diag es de cada dispositivo (cuántas veces ha guardado ESTE aparato),
+     así que no sube a la nube: si subiera, al traer datos del otro dispositivo
+     el contador se sustituiría por el suyo y dejaría de significar nada.
+     __sync sí viaja: son las marcas de tiempo de la sincronización. */
+  const copia = Object.assign({}, S);
+  delete copia.__diag;
+  return copia;
+}
+function setState(obj){
+  const diagLocal = S && S.__diag;          // se conserva el del propio dispositivo
+  S = Object.assign(deepClone(DEFAULT_STATE), saneEstado(obj,'nube'));   // v33: la nube tampoco se fia
+  if(diagLocal) S.__diag = diagLocal; else delete S.__diag;
+  migrateQuotes(true);                       // en silencio: sin provocar otro guardado
+  /* v42: esta escritura directa se saltaba la guarda de lectura. Un pull con
+     el estado sin leer habria escrito igual. */
+  try{ if(ESTADO_LEIDO) window.storage.set(KEY, JSON.stringify(S)); }catch(e){}
+}
+function fmtWhen(ms){
+  if(!ms) return 'nunca';
+  const d=new Date(ms);
+  return d.toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+}
+let diagAbierto = false;
+function toggleDiag(){ diagAbierto = !diagAbierto; renderDiag(); }
+function renderDiag(){
+  const el=$('#diagCard'); if(!el) return;
+  const hayProblema = DIAG.fails>0 || !!DIAG.lastError || DIAG.backend==='memoria';
+  const abierto = diagAbierto || hayProblema;
+  if(!abierto){
+    el.innerHTML='<div class="diag-head"><span>'+(DIAG.lastOk?'Guardando bien · último: '+fmtWhen(DIAG.lastOk):'Todavía no se ha guardado nada')+'</span>'+
+      '<button class="diag-toggle" data-act="toggleDiag" aria-expanded="false">Ver detalles</button></div>';
+    return;
+  }
+  const backend={claude:'Claude (tu cuenta)', localStorage:'Este navegador', memoria:'Memoria temporal (NO guarda)'}[DIAG.backend]||DIAG.backend;
+  const nunca=!DIAG.lastOk;
+  el.innerHTML='<p><strong>Dónde guarda:</strong> '+esc(backend)+'<br>'+
+    '<strong>Último guardado correcto:</strong> '+(nunca?'todavía ninguno':fmtWhen(DIAG.lastOk))+'<br>'+
+    '<strong>Guardados en total:</strong> '+DIAG.writes+'<br>'+
+    '<strong>Fallos en esta sesión:</strong> '+DIAG.fails+'<br>'+
+    '<strong>Fallos de lectura:</strong> '+DIAG.readFails+(ESTADO_LEIDO?'':' · <span class="mono">no se está guardando</span>')+'<br>'+
+    '<strong>Tamaño de tus datos:</strong> '+(function(){ try{ return JSON.stringify(S).length+' caracteres'; }catch(e){ return 'no se puede medir'; } })()+
+    (SONDA?'<br><strong>Sonda del almacén:</strong> '+(SONDA==='clave'?'responde, pero falla la clave de tus datos':'no responde'):'')+
+    (TEMA_LEIDO?'':'<br><strong>Tema:</strong> no se pudo leer, no se está guardando')+
+    (DIAG.lastError?'<br><strong>Último error:</strong> <span class="mono">'+esc(DIAG.lastError)+'</span>':'')+
+    '</p>'+
+    /* v33: si al arrancar o al bajar de la nube llegó algo con la forma
+       equivocada, se repara solo y se dice AQUÍ. Antes desaparecía en silencio
+       y parecía que se habían perdido datos. */
+    (REPARACIONES.length?'<p style="font-size:.82rem;"><strong>Datos reparados al cargar:</strong><br>'+
+      REPARACIONES.map(r=>'· <span class="mono">'+esc(r.campo)+'</span> ('+esc(r.origen)+'): se esperaba '+
+        esc(r.esperado)+', llegó '+esc(r.llego)+'. Se ha repuesto el valor por defecto.').join('<br>')+
+      '</p>':'')+
+    (nunca?'<p style="font-size:.8rem;color:var(--muted);">Todavía no se ha guardado nada. No es un fallo: hace falta que cambies algo, o que pulses el botón de abajo.</p>':'<p style="font-size:.8rem;color:var(--muted);">El total y la fecha se conservan al cerrar la app: si al volver siguen aquí, la persistencia funciona.</p>')+
+    '<div class="bk-row" style="margin-top:10px;"><button class="accent" data-act="probarGuardado">Probar guardado ahora</button></div>'+
+    '<div id="diagResult"></div>'+
+    '<p style="margin-top:8px;font-size:.78rem;color:var(--faint);">Si algo falla, copia esta tarjeta y pásamela: con el texto exacto del error sé qué arreglar.</p>'+
+    (hayProblema?'':'<div class="diag-head" style="margin-top:6px;"><span></span><button class="diag-toggle" data-act="toggleDiag" aria-expanded="true">Ocultar detalles</button></div>');
+}
+/* Datos de ejemplo (C7): RETIRADO en la v35.
+   Estuvo en la v33 y v34. Se quita porque en la practica no hacia falta:
+   rellenando dos dias a mano ya se ve como queda el calendario. El codigo
+   completo esta en calma_v34.html si algun dia se quiere recuperar.
+   Se retira tambien c7-test.js. */
+
+async function probarGuardado(){
+  const res=$('#diagResult');
+  res.innerHTML='<p style="margin-top:10px;">Probando…</p>';
+  const marca='prueba-'+Date.now();
+  let escrito=false, leido=null, err='';
+  try{
+    await window.storage.set(KEY+'-test', marca);
+    escrito=true;
+    const r=await window.storage.get(KEY+'-test');
+    leido=r&&r.value;
+    try{ await window.storage.delete(KEY+'-test'); }catch(e){}
+  }catch(e){ err=(e&&(e.message||e.name))||String(e); }
+  if(escrito && leido===marca){
+    // ahora una escritura real del estado, para comprobar el tamaño completo
+    try{
+      const stamp=Date.now();
+      const prev=(S.__diag&&S.__diag.writes)||0;
+      S.__diag={lastOk:stamp, writes:prev+1};
+      await window.storage.set(KEY, JSON.stringify(S));
+      DIAG.writes=prev+1; DIAG.lastOk=stamp; DIAG.lastError='';
+      res.innerHTML='<div class="conflict-box" style="border-color:var(--teal);"><p style="color:var(--teal);"><strong>Guardado correcto.</strong> Escribí y volví a leer el dato de prueba, y también tus datos reales ('+JSON.stringify(S).length+' caracteres). El almacenamiento funciona.</p></div>';
+    }catch(e2){
+      DIAG.fails++; DIAG.lastError=(e2&&(e2.message||e2.name))||String(e2);
+      res.innerHTML='<div class="conflict-box"><p><strong>La prueba pequeña pasó, pero guardar TUS datos falló.</strong><br>Tamaño: '+JSON.stringify(S).length+' caracteres.<br>Error: <span class="mono">'+esc(DIAG.lastError)+'</span><br>Copia este texto y pásaselo a Claude.</p></div>';
+    }
+  }else{
+    DIAG.fails++; DIAG.lastError=err||'escribió pero al leer devolvió otra cosa';
+    res.innerHTML='<div class="conflict-box"><p><strong>No se puede guardar en este entorno.</strong><br>Error: <span class="mono">'+esc(DIAG.lastError)+'</span><br>Exporta tus datos antes de cerrar y pásale este texto a Claude.</p></div>';
+  }
+}
+/* iconos del ojo para mostrar u ocultar la contraseña */
+const ICON_EYE = "<svg viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12Z'/><circle cx='12' cy='12' r='3.1'/></svg>";
+const ICON_EYE_OFF = "<svg viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12Z'/><circle cx='12' cy='12' r='3.1'/><path d='M4 3.6 20 20.4'/></svg>";
+function renderCloud(){
+  const el=$('#cloudCard'); if(!el) return;
+  if(!cloudConfigured()){
+    el.innerHTML='<h3>Sin configurar</h3><p>Abre este archivo y rellena <span class="mono">CLOUD_CFG.url</span> y <span class="mono">CLOUD_CFG.anonKey</span> con los datos de tu proyecto de Supabase. Los pasos están en GUIA-supabase.md. Mientras tanto, la app funciona igual: guarda en este dispositivo.</p>';
+    return;
+  }
+  if(!CLOUD.session){
+    el.innerHTML='<h3>Conectar este dispositivo</h3>'+
+      '<p>Entra con tu correo y contraseña. La primera vez, pulsa «Crear cuenta»; en los demás dispositivos, «Entrar» con los mismos datos.</p>'+
+      '<div class="cloud-form"><input id="cloudEmail" type="email" inputmode="email" autocomplete="username" placeholder="tu correo" aria-label="Correo"></div>'+
+      '<div class="cloud-form"><input id="cloudPass" type="password" autocomplete="current-password" placeholder="contraseña (mínimo 6)" aria-label="Contraseña"><button id="cloudEye" class="eye" data-act="uiTogglePass" aria-label="Mostrar la contraseña" title="Mostrar la contraseña">'+ICON_EYE+'</button></div>'+
+      '<div class="bk-row" style="margin-top:10px;"><button class="accent" data-act="uiLogin">Entrar</button><button data-act="uiSignup">Crear cuenta</button></div>';
+    return;
+  }
+  const st=CLOUD.status;
+  const label={off:'Desconectado', idle:'Conectado', sync:'Sincronizando…', ok:'Al día', error:'Error: '+(CLOUD.lastError||''), conflict:'Hay un conflicto que resolver'}[st]||st;
+  el.innerHTML='<div class="cloud-state"><span class="cloud-dot '+st+'"></span><span>'+esc(label)+'</span></div>'+
+    '<p>Cuenta: <span class="mono">'+esc(CLOUD.session.email||'')+'</span><br>Última sincronización: '+fmtWhen(CLOUD.meta.lastSyncedAt)+'</p>'+
+    '<div class="bk-row" style="margin-top:10px;"><button class="accent" data-act="cloudSync">Sincronizar ahora</button><button data-act="uiDisconnect">Desconectar</button></div>'+
+    '<div id="conflictSlot"></div>';
+}
+function uiTogglePass(){
+  const i=$('#cloudPass'), b=$('#cloudEye'); if(!i||!b) return;
+  const shown = i.type==='text';
+  i.type = shown ? 'password' : 'text';
+  b.innerHTML = shown ? ICON_EYE : ICON_EYE_OFF;
+  const lbl = shown ? 'Mostrar la contraseña' : 'Ocultar la contraseña';
+  b.setAttribute('aria-label', lbl); b.setAttribute('title', lbl);
+  i.focus();
+}
+function cloudCreds(){
+  const em=($('#cloudEmail').value||'').trim(), pw=$('#cloudPass').value||'';
+  if(!em){ toast('Escribe tu correo.'); return null; }
+  if(pw.length<6){ toast('La contraseña necesita al menos 6 caracteres.'); return null; }
+  return {em:em, pw:pw};
+}
+async function uiLogin(){
+  const c=cloudCreds(); if(!c) return;
+  try{ await cloudSignIn(c.em,c.pw); CLOUD.status='idle'; renderCloud(); toast('Dispositivo conectado.'); cloudSync(); }
+  catch(e){ toast('No se pudo entrar: '+(e.message||e)); }
+}
+async function uiSignup(){
+  const c=cloudCreds(); if(!c) return;
+  try{ await cloudSignUp(c.em,c.pw); CLOUD.status='idle'; renderCloud(); toast('Cuenta creada y dispositivo conectado.'); cloudSync(); }
+  catch(e){ toast('No se pudo crear la cuenta: '+(e.message||e)); }
+}
+async function uiDisconnect(){
+  /* Reversible: los datos siguen aqui y en la nube, solo se corta el enlace.
+     Por eso deshacer, no preguntar. */
+  const sesion=CLOUD.session;
+  if(!sesion) return;
+  borrarConDeshacer('Dispositivo desconectado de la nube.',
+    async ()=>{ await cloudDisconnect(); renderCloud(); },
+    async ()=>{
+      CLOUD.session=sesion; CLOUD.status='idle';
+      try{ await window.storage.set(SESS_KEY, JSON.stringify(sesion)); }catch(e){}
+      renderCloud();
+    });
+}
+function showConflict(remote){
+  renderCloud();
+  const slot=$('#conflictSlot'); if(!slot) return;
+  slot.innerHTML='<div class="conflict-box"><h3>Dos versiones distintas</h3>'+
+    '<p>Este dispositivo cambió el '+fmtWhen(CLOUD.meta.lastLocalChange)+'.<br>'+
+    'La nube cambió el '+fmtWhen(remote.updated_ms)+'.<br>'+
+    'No elijo por ti. Antes de decidir, puedes exportar una copia abajo.</p>'+
+    '<div class="opt">'+
+    '<button data-act=\"uiResolve\" data-arg=\"push\">Mandar lo de este dispositivo</button>'+
+    '<button data-act=\"uiResolve\" data-arg=\"pull\">Traer lo de la nube</button>'+
+    '</div></div>';
+}
+/* v40. Antes esta funcion era la UNICA accion async de la nube sin try/catch
+   (uiLogin, uiSignup y cloudSync si lo tenian). Si la red fallaba a mitad:
+     - el cuadro de conflicto ya se habia borrado, asi que desaparecia
+     - el error se perdia sin capturar: ningun mensaje en pantalla
+     - la meta ya estaba medio cambiada, asi que el conflicto volvia despues
+   El usuario veia exactamente lo mismo que con un boton roto: nada.
+   Dos cambios: se captura el error y se avisa, y el cuadro NO se borra hasta
+   que la operacion sale bien, para poder reintentar. */
+/* v44: esto NO admite deshacer. Cuando se resuelve, la escritura en la nube ya
+   ha ocurrido y lo que habia al otro lado ya no esta. Para lo irreversible, el
+   patron es confirmar en dos pasos SOBRE EL PROPIO BOTON, que vuelve a su
+   estado a los 6 s si no se pulsa otra vez. */
+let resolveArmado=null;
+function botonResolve(which){
+  return $('#conflictSlot') ? $('#conflictSlot').querySelector('button[data-arg="'+which+'"]') : null;
+}
+function desarmarResolve(){
+  if(resolveArmado){ clearTimeout(resolveArmado.timer); }
+  const b=resolveArmado && botonResolve(resolveArmado.which);
+  if(b) b.textContent=resolveArmado.texto;
+  resolveArmado=null;
+}
+async function uiResolve(which){
+  if(!resolveArmado || resolveArmado.which!==which){
+    desarmarResolve();
+    const b=botonResolve(which);
+    const texto=b?b.textContent:'';
+    resolveArmado={which:which, texto:texto, timer:setTimeout(desarmarResolve,6000)};
+    if(b) b.textContent = which==='push'
+      ? 'Pulsa otra vez: se reemplaza la nube'
+      : 'Pulsa otra vez: se reemplaza este aparato';
+    return;
+  }
+  clearTimeout(resolveArmado.timer); resolveArmado=null;
+  const previo = CLOUD.meta.lastRemoteUpdatedAt;
+  try{
+    CLOUD.meta.lastRemoteUpdatedAt = which==='pull' ? 0 : Date.now();
+    if(which==='push'){ CLOUD.meta.lastRemoteUpdatedAt=0; await cloudSync({force:'push'}); }
+    else {
+      const remote=await cloudFetchRemote();
+      if(remote){ await cloudPull(remote); renderAll(); }
+    }
+    const slot=$('#conflictSlot'); if(slot) slot.innerHTML='';   // solo si fue bien
+    CLOUD.status='ok'; renderCloud();
+  }catch(e){
+    CLOUD.meta.lastRemoteUpdatedAt = previo;      // se deshace el cambio a medias
+    CLOUD.status='error'; CLOUD.lastError=(e&&e.message)||String(e);
+    toast('No se pudo resolver: '+CLOUD.lastError+'. El conflicto sigue ahí; puedes reintentarlo.');
+    renderCloud();
+  }
+}
+
+/* =================== estado de la app =================== */
+const KEY='calma-app-v1';
+const DEFAULT_STATE={
+  kitItems:[
+    {id:'tapones', name:'Tapones de espuma', desc:'Para ruido y sitios llenos. Lleva un par de repuesto.'},
+    {id:'auriculares', name:'Auriculares (cancelación / transparencia)', desc:'Transparencia si necesitas oír la calle.'},
+    {id:'fidget', name:'Fidget o piedra lisa', desc:'Sujétalo y respira lento si no puedes salir.'},
+    {id:'agua', name:'Botella de agua', desc:'Beber agua fría también baja la activación.'}
+  ],
+  kitChecks:{},
+  afterChecks:{},
+  days:{},
+  sleepItems:[
+    {id:'cerrar', name:'Cerrar el ordenador a la hora fijada', desc:'Los shaders pueden esperar a mañana. La activación mental es tu disparador.'},
+    {id:'volcado', name:'Volcado mental: 5 min en el cuaderno', desc:'La lista de mañana, en papel y específica. Sin pantallas.'},
+    {id:'manana', name:'Preparar lo de mañana', desc:'Ropa, mochila, kit sensorial. Menos decisiones al despertar.'},
+    {id:'movil', name:'Móvil al otro lado de la habitación', desc:'Con la alarma ya puesta y con volumen.'},
+    {id:'luz', name:'Luz baja y cálida', desc:'Señal de bajada para el cuerpo.'}
+  ],
+  sleepChecks:{},
+  sleep:{shutdown:''},
+  checkins:{},
+  quotes:[
+    {id:'q1', text:'El mundo no se acaba si algo se retrasa.', fav:true, mine:false},
+    {id:'q2', text:'Tienes permiso para soltar las cosas. Olvida lo que no importa y perdónate. Deja correr aquel momento incómodo de la semana pasada. La vida sigue.', fav:false, mine:false},
+    {id:'q3', text:'Las cosas mejoran. No te sientas mal porque te cueste estudiar o trabajar: irás mejorando a medida que aprendas estrategias.', fav:false, mine:false},
+    {id:'q4', text:'Perdónate por tus límites.', fav:false, mine:false},
+    {id:'q5', text:'Suelta la vergüenza: mina la motivación y solo empeora las cosas. No avergonzarías a alguien en silla de ruedas por no hacer cosas; tu dificultad está en el cerebro y no en las piernas, pero es igual de real.', fav:false, mine:false},
+    {id:'q6', text:'Deja de odiarte. No mires al futuro. No mires al pasado. Mira al presente.', fav:false, mine:false}
+  ]
+};
+const deepClone=o=>JSON.parse(JSON.stringify(o));
+
+/* =================== saneEstado (v33 - C8 reducido) ===================
+   Hasta la v32 la validacion de forma vivia DENTRO de importBackup. Los datos
+   que se leen del almacen al arrancar y los que bajan de la nube no pasaban
+   por ella. Medido antes de escribir esto: de seis formas corruptas, cuatro
+   las aguantaba la app sola; solo `quotes` que no fuese lista reventaba, y
+   reventaba por las dos puertas sin validar (excepcion en migrateQuotes, que
+   corta loadState antes de renderAll y deja la pestana Frases vacia sin aviso).
+   Por eso esto valida lo que se midio roto, no todo el estado: un validador
+   general no lo justificaban los datos. Si algun dia hace falta, se amplia
+   AQUI y las tres puertas lo heredan solas.
+   REPARACIONES_VISIBLES = false vuelve al comportamiento de la v32 en cuanto
+   al aviso (se repara igual, pero sin apuntarlo en Diagnostico). */
+const REPARACIONES_VISIBLES = true;
+const REPARACIONES = [];          // volatil: es un aviso de sesion, no un dato
+
+function saneEstado(obj, origen){
+  const o = (obj && typeof obj==='object' && !Array.isArray(obj)) ? deepClone(obj) : {};
+  /* __proto__ y constructor: JSON.parse no dispara setters, pero el
+     Object.assign posterior si. Se quitan antes de fusionar. */
+  delete o.__proto__; delete o.constructor; delete o.prototype;
+  const apunta=(campo,esperado,llego)=>{
+    if(!REPARACIONES_VISIBLES) return;
+    REPARACIONES.push({campo:campo, esperado:esperado, llego:llego, origen:origen||'?'});
+  };
+  const tipoDe=v=>Array.isArray(v)?'lista':(v===null?'nulo':typeof v);
+  /* listas: si no lo son, migrateQuotes revienta y los render pintan vacio */
+  ['quotes','kitItems','sleepItems'].forEach(k=>{
+    if(o[k]!==undefined && !Array.isArray(o[k])){
+      apunta(k,'lista',tipoDe(o[k])); delete o[k];   // vuelve el valor por defecto
+    }
+  });
+  /* objetos indexados por fecha */
+  ['days','kitChecks','sleepChecks','afterChecks','checkins'].forEach(k=>{
+    if(o[k]!==undefined && (typeof o[k]!=='object' || o[k]===null || Array.isArray(o[k]))){
+      apunta(k,'objeto',tipoDe(o[k])); delete o[k];
+    }
+  });
+  /* frases sin texto: no revientan, pero pintan filas vacias */
+  if(Array.isArray(o.quotes)){
+    const antes=o.quotes.length;
+    o.quotes=o.quotes.filter(q=>q&&typeof q==='object'&&typeof q.text==='string');
+    if(o.quotes.length!==antes) apunta('quotes','frases con texto',(antes-o.quotes.length)+' descartadas');
+  }
+  return o;
+}
+let S=deepClone(DEFAULT_STATE);
+let saveT=null;
+
+/* ================= v42 · modo protegido de lectura =================
+   EL FALLO QUE ESTO ARREGLA. Hasta la v41, si la lectura del almacen fallaba
+   al arrancar, S se quedaba en los valores por defecto y el PRIMER cambio del
+   usuario escribia ese vacio ENCIMA de los datos buenos. Un error pasajero del
+   servidor borraba todo. Medido con repro-fallos.js contra la v41: el almacen
+   todavia tenia el dato, y tras un solo cambio ya no lo tenia.
+   Regla: mientras no se haya podido LEER, no se ESCRIBE. Nunca se decide por
+   el usuario: la banda de aviso ofrece las tres salidas y una de ellas
+   (empezar de cero) es la unica que si escribe encima, y a peticion suya. */
+let ESTADO_LEIDO=false;
+let LECTURA_ERROR='';
+
+/* Tres intentos: 0 / 400 / 1200 ms. Un fallo de red o un pico del servidor
+   suele haber pasado al segundo intento. */
+async function leerConReintentos(clave){
+  const esperas=[0,400,1200];
+  let ultimo=null;
+  for(let i=0;i<esperas.length;i++){
+    if(esperas[i]) await new Promise(r=>setTimeout(r,esperas[i]));
+    try{ return {ok:true, r:await window.storage.get(clave)}; }
+    catch(e){ ultimo=e; DIAG.readFails++; }
+  }
+  return {ok:false, error:(ultimo&&(ultimo.message||ultimo.name))||'error de lectura'};
+}
+
+/* ================= v43 · sonda del almacen =================
+   Cuando la lectura falla hay DOS causas con consejos opuestos, y sin
+   distinguirlas no se puede recomendar nada:
+     - el almacen entero esta caido  -> esperar; empezar de cero no arregla nada
+     - solo falla LA CLAVE de tus datos -> los datos de ahi no se recuperan,
+       pero empezar de cero deja la app usable
+   Se distingue escribiendo y leyendo una clave de usar y tirar. Nunca toca KEY. */
+let SONDA='';        // '' sin sondar · 'clave' · 'almacen'
+async function sondarAlmacen(){
+  const k=KEY+'-sonda', v='s'+Date.now();
+  try{
+    await window.storage.set(k,v);
+    const r=await window.storage.get(k);
+    SONDA=(r && r.value===v) ? 'clave' : 'almacen';
+  }catch(e){ SONDA='almacen'; }
+  try{ await window.storage.delete(k); }catch(e){}
+  return SONDA;
+}
+function textoSonda(){
+  if(SONDA==='clave')   return 'El almacenamiento responde: falla solo la clave de tus datos. Reintentar puede no servir; «Empezar de cero» deja la app usable, pero lo que hubiera guardado ahí no se recupera (salvo desde la nube o desde una copia).';
+  if(SONDA==='almacen') return 'El almacenamiento entero no responde. No es cosa de tus datos: espera un poco y pulsa Reintentar. Empezar de cero no arreglaría nada.';
+  return '';
+}
+
+function ocultarAvisoLectura(){ const b=$('#readWarn'); if(b){ b.style.display='none'; b.innerHTML=''; } }
+function mostrarAvisoLectura(){
+  const b=$('#readWarn'); if(!b) return;
+  b.style.display='block';
+  /* El aviso NO puede ser un callejon sin salida: siempre hay algo que pulsar.
+     El boton de la nube solo aparece si hay sesion, porque si no, no lleva
+     a ninguna parte. */
+  b.innerHTML='<p style="margin:0 0 8px;"><strong>No he podido leer tus datos guardados.</strong> '+
+    esc(LECTURA_ERROR)+'. Mientras tanto la app <strong>no guarda nada</strong>, para no escribir encima de lo que hay.</p>'+
+    (textoSonda()?'<p style="margin:0 0 8px;font-size:.82rem;">'+esc(textoSonda())+'</p>':'')+
+    '<div class="bk-row">'+
+    '<button data-act="reintentarLectura">Reintentar</button>'+
+    ((typeof CLOUD!=='undefined' && CLOUD.session)?'<button data-act="traerDeNube">Traer mis datos de la nube</button>':'')+
+    '<button id="btnCero" data-act="empezarDeCero">Empezar de cero</button>'+
+    '</div>';
+}
+
+async function loadState(){
+  const res=await leerConReintentos(KEY);
+  if(!res.ok){
+    ESTADO_LEIDO=false; LECTURA_ERROR=res.error; DIAG.lastError=res.error;
+    renderAll(); mostrarAvisoLectura(); renderDiag();
+    await sondarAlmacen();                 // el aviso ya esta puesto: se repinta con el resultado
+    mostrarAvisoLectura(); renderDiag();
+    return;
+  }
+  const r=res.r;
+  if(r && r.value){
+    try{
+      const parsed=JSON.parse(r.value);
+      /* v33: antes esto entraba sin revisar. Un quotes corrupto reventaba aqui
+         mismo, en migrateQuotes, y cortaba loadState antes de renderAll. */
+      S=Object.assign(deepClone(DEFAULT_STATE), saneEstado(parsed,'almacen'));
+    }catch(e){
+      /* El almacen respondio, pero lo que hay dentro no es JSON. No se sabe si
+         se puede recuperar, asi que tampoco se escribe encima sin permiso. */
+      ESTADO_LEIDO=false; LECTURA_ERROR='los datos guardados no se pueden interpretar';
+      DIAG.lastError=LECTURA_ERROR;
+      SONDA='clave';                       // el almacen respondio: el problema es el contenido
+      renderAll(); mostrarAvisoLectura(); renderDiag();
+      return;
+    }
+  }
+  /* Leer y no encontrar nada TAMBIEN es una lectura correcta: es el primer uso
+     legitimo. Si esto no marcara ESTADO_LEIDO, la app nunca guardaria nada. */
+  ESTADO_LEIDO=true; LECTURA_ERROR=''; ocultarAvisoLectura();
+  if(S.__diag){ DIAG.lastOk=S.__diag.lastOk||0; DIAG.writes=S.__diag.writes||0; }
+  migrateQuotes();
+  renderAll();
+  if(window.__storageBackend==='memoria'){
+    toast('Aviso: este navegador no permite guardar. Todo se perderá al cerrar; usa Exportar.');
+  }
+}
+
+/* ---------- las tres salidas del aviso ---------- */
+async function reintentarLectura(){
+  toast('Reintentando…');
+  await loadState();
+  if(ESTADO_LEIDO){ toast('Datos recuperados.'); await writeState(1); }
+  else { await sondarAlmacen(); mostrarAvisoLectura(); toast('Sigue sin poder leerse: '+LECTURA_ERROR); }
+  renderDiag();
+}
+window.reintentarLectura=reintentarLectura;
+
+async function traerDeNube(){
+  if(typeof CLOUD==='undefined' || !CLOUD.session){ toast('No hay sesión de nube.'); return; }
+  try{
+    const remote=await cloudFetchRemote();
+    if(!remote){ toast('En la nube no hay datos de esta app.'); return; }
+    ESTADO_LEIDO=true;                      // antes de setState: si no, no escribiria
+    setState(remote.data);
+    CLOUD.meta.lastSyncedAt=Date.now();
+    CLOUD.meta.lastLocalChange=CLOUD.meta.lastSyncedAt;
+    CLOUD.meta.lastRemoteUpdatedAt=remote.updated_ms;
+    await saveMeta(true);
+    LECTURA_ERROR=''; ocultarAvisoLectura(); renderAll(); renderDiag();
+    toast('Datos traídos de la nube.');
+  }catch(e){
+    ESTADO_LEIDO=false;                     // no se recupero: sigue protegido
+    toast('No se pudo traer de la nube: '+((e&&e.message)||e));
+  }
+}
+window.traerDeNube=traerDeNube;
+
+/* Irreversible: escribe encima de lo que hubiera. Por eso va en dos pasos sobre
+   el propio boton, que se desarma solo a los 6 s. */
+let ceroArmado=null;
+function empezarDeCero(){
+  const b=$('#btnCero');
+  if(!ceroArmado){
+    if(b) b.textContent='Pulsa otra vez para confirmar';
+    ceroArmado=setTimeout(function(){ ceroArmado=null; const x=$('#btnCero'); if(x) x.textContent='Empezar de cero'; },6000);
+    return;
+  }
+  clearTimeout(ceroArmado); ceroArmado=null;
+  ESTADO_LEIDO=true; LECTURA_ERROR=''; TEMA_LEIDO=true;
+  ocultarAvisoLectura();
+  writeState(1,true);
+  renderAll(); renderDiag();
+  toast('Empezando de cero. A partir de ahora sí se guarda.');
+}
+window.empezarDeCero=empezarDeCero;
+let cloudT=null;
+const DIAG={backend:(window.__storageBackend||'claude'), lastOk:0, lastError:'', writes:0, fails:0, readFails:0};
+async function writeState(attempt, forzar){
+  /* v42: la guarda va lo PRIMERO. Cualquier camino que acabe escribiendo pasa
+     por aqui: save() agrupado, saveMeta(true) de la nube y probarGuardado. */
+  if(!ESTADO_LEIDO && !forzar){
+    DIAG.fails++;
+    DIAG.lastError='no se escribe: todavía no se han podido leer tus datos';
+    mostrarAvisoLectura(); renderDiag();
+    return;
+  }
+  const stamp=Date.now();
+  const prev=(S.__diag&&S.__diag.writes)||0;
+  S.__diag={lastOk:stamp, writes:prev+1};   // se guarda junto a los datos: sobrevive al cierre
+  try{
+    await window.storage.set(KEY, JSON.stringify(S));
+    DIAG.writes=prev+1; DIAG.lastOk=stamp; DIAG.lastError='';
+    const b=$('#saveWarn'); if(b) b.style.display='none';
+    renderDiag();
+  }catch(e){
+    DIAG.fails++;
+    DIAG.lastError=(e&&(e.message||e.name))||String(e);
+    const a=attempt||1;
+    if(a<3){ setTimeout(()=>writeState(a+1, forzar), a*1500); return; }   // reintentos: 1,5s y 3s
+    const b=$('#saveWarn');
+    if(b){ b.style.display='block'; b.textContent='No se está guardando ('+DIAG.lastError+'). Ve a Registro → Copia de seguridad y exporta antes de cerrar.'; }
+    toast('No se pudo guardar: '+DIAG.lastError);
+    renderDiag();
+  }
+}
+function save(){
+  clearTimeout(saveT);
+  markLocalChange();
+  saveT=setTimeout(()=>writeState(1), 900);   // una sola escritura, agrupando cambios seguidos
+  clearTimeout(cloudT);
+  cloudT=setTimeout(()=>{ if(CLOUD.session && navigator.onLine!==false) cloudSync(); }, 6000);
+}
+
+/* =================== deshacer (v44) =================== */
+/* POR QUE. Los visores incrustados capan confirm(): el boton parece roto y no
+   dice por que. Ademas interrumpe para preguntar por algo que casi siempre se
+   quiere hacer. El trato se invierte: la accion ocurre YA y durante 6 s hay una
+   salida. Se guarda el elemento Y SU INDICE, para que al volver no aparezca al
+   final de la lista.
+   Un ayudante comun evita que el proximo borrado se quede sin red: hay una
+   prueba que recorre el codigo y falla si alguno no pasa por aqui. */
+let DESHACER=null;
+function ocultarDeshacer(){
+  const b=$('#undoBar'); if(b){ b.style.display='none'; b.textContent=''; }
+}
+function consumarDeshacer(){
+  if(!DESHACER) return;
+  clearTimeout(DESHACER.timer); clearInterval(DESHACER.tic);
+  DESHACER=null; ocultarDeshacer();
+}
+function pintarDeshacer(desc, quedan){
+  const b=$('#undoBar'); if(!b) return;
+  b.textContent='';
+  b.style.display='flex';
+  const s=document.createElement('span'); s.textContent=desc;
+  const btn=document.createElement('button');
+  btn.setAttribute('data-act','deshacer');
+  btn.textContent='↩ Deshacer ('+quedan+')';
+  b.appendChild(s); b.appendChild(btn);
+}
+function borrarConDeshacer(desc, quitar, reponer){
+  /* si llega una segunda accion, la primera se consuma: no se encolan */
+  consumarDeshacer();
+  quitar();
+  let quedan=6;
+  DESHACER={reponer:reponer};
+  pintarDeshacer(desc, quedan);
+  DESHACER.tic=setInterval(function(){
+    quedan--;
+    if(quedan>0 && DESHACER) pintarDeshacer(desc, quedan);
+  },1000);
+  DESHACER.timer=setTimeout(consumarDeshacer,6000);
+}
+function deshacer(){
+  if(!DESHACER) return;
+  const reponer=DESHACER.reponer;
+  clearTimeout(DESHACER.timer); clearInterval(DESHACER.tic);
+  DESHACER=null; ocultarDeshacer();
+  try{ reponer(); }catch(e){ toast('No se pudo deshacer: '+((e&&e.message)||e)); }
+}
+window.deshacer=deshacer;
+
+/* =================== utilidades =================== */
+const todayKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+/* v28: el icono se construye como elemento, no como texto. Asi ninguna funcion
+   que pinte filas necesita volver a usar innerHTML. */
+/* ---------- motor de animaciones (v30) ----------
+   El problema: renderKit, renderSleep y renderAfter reconstruyen la lista
+   ENTERA en cada cambio. Si la animacion de entrada se pone en .check-row, se
+   dispara en todas las filas cada vez que marcas una, y eso es parpadeo, no
+   respuesta. Solucion: antes de repintar se apunta QUE fila cambio y POR QUE;
+   el constructor de filas se lo pone solo a esa y borra la nota. */
+var animHint=null;
+function animarProxima(id,tipo){ if(animOn()) animHint={id:id,tipo:tipo}; }
+function animOn(){
+  if(!THEME.anim) return false;
+  try{ if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return false; }catch(e){}
+  return true;
+}
+function aplicarAnim(el,id){
+  if(!animHint||animHint.id!==id) return;
+  el.classList.add(animHint.tipo);
+  animHint=null;
+}
+/* Para borrar hace falta lo contrario: la fila se va ANTES de que se rehaga la
+   lista. Sin animaciones, se ejecuta al momento y no se espera a nada. */
+function salirY(el,fn){
+  if(!animOn()||!el){ fn(); return; }
+  el.classList.add('an-out');
+  setTimeout(fn,Math.round((THEME.animMs||ANIM_MS)*0.9));
+}
+window.setAnimMs=function(ms){
+  if(ANIM_STEPS.indexOf(Number(ms))<0) return;
+  THEME.animMs=Number(ms); saveTheme(); applyTheme(); renderThemePop();
+};
+window.toggleAnim=function(){ THEME.anim=!THEME.anim; saveTheme(); applyTheme(); renderThemePop(); };
+function svgIcon(id,cls){
+  const NS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('class','ic'+(cls?' '+cls:''));
+  svg.setAttribute('aria-hidden','true');
+  const use=document.createElementNS(NS,'use');
+  use.setAttribute('href','#'+id);
+  svg.appendChild(use);
+  return svg;
+}
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function vib(pattern){ if(navigator.vibrate){ try{navigator.vibrate(pattern);}catch(e){} } }
+
+/* =================== wake lock (pantalla encendida en ejercicios) =================== */
+let wakeLock=null;
+async function wlAcquire(){
+  if(!('wakeLock' in navigator)) return;
+  try{ wakeLock=await navigator.wakeLock.request('screen'); }catch(e){ wakeLock=null; }
+}
+function wlRelease(){
+  try{ if(wakeLock) wakeLock.release(); }catch(e){}
+  wakeLock=null;
+}
+function anyExerciseOpen(){
+  return $('#stepsOverlay').classList.contains('open') || $('#breathOverlay').classList.contains('open');
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible' && anyExerciseOpen()) wlAcquire();
+});
+
+/* =================== tabs =================== */
+function setTab(name, moverFoco){
+  tabActual = name;
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id==='tab-'+name));
+  renderTab(name);          // la pestaña se pone al día justo al abrirla
+  document.querySelectorAll('nav.tabs button').forEach(b=>{
+    const activa = b.dataset.tab===name;
+    b.classList.toggle('active', activa);
+    /* aria-current: es lo que hace que un lector de pantalla diga cuál está abierta */
+    if(activa) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  window.scrollTo({top:0});
+  /* el foco se lleva al panel abierto: si no, un lector de pantalla o el teclado
+     se quedan leyendo donde estaban antes del cambio */
+  if(moverFoco!==false){
+    const panel=document.getElementById('tab-'+name);
+    if(panel){ try{ panel.focus({preventScroll:true}); }catch(e){ panel.focus(); } }
+  }
+}
+function goSOS(){
+  setTab('ahora');
+  const k=todayKey();
+  S.days[k]=S.days[k]||{};
+  S.days[k].sos=true;
+  save(); renderCal();
+}
+
+/* =================== KIT =================== */
+/* trozo comun de las filas de Kit y de Sueno: casilla, textos y boton de
+   borrar. Devuelve un fragmento, sin una sola linea de HTML como texto. */
+/* La fila es un div con rol de boton: acepta Intro y Espacio como un boton
+   nativo, pero permite llevar dentro el boton de borrar sin anidar botones. */
+function filaFila(done,alPulsar,id){
+  const row=document.createElement('div');
+  row.className='check-row'+(done?' done':'');
+  row.setAttribute('role','button');
+  row.setAttribute('tabindex','0');
+  row.setAttribute('aria-pressed',done?'true':'false');
+  row.addEventListener('click',alPulsar);
+  row.addEventListener('keydown',(ev)=>{
+    if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); alPulsar(ev); }
+  });
+  if(id!==undefined) aplicarAnim(row,id);
+  return row;
+}
+function filaCheck(done,item,etiquetaBorrar,alBorrar){
+  /* alBorrar opcional: la lista de Despues no se puede editar, pero tiene que
+     dibujarse igual que las otras dos (mismo tick SVG, misma estructura). */
+  const frag=document.createDocumentFragment();
+  const box=document.createElement('span'); box.className='box';
+  if(done) box.appendChild(svgIcon('i-check'));
+  const medio=document.createElement('span');
+  const lbl=document.createElement('span'); lbl.className='lbl';
+  lbl.textContent=typeof item.name==='string'?item.name:'';
+  const sub=document.createElement('span'); sub.className='sub';
+  sub.textContent=typeof item.desc==='string'?item.desc:'';
+  medio.appendChild(lbl); medio.appendChild(sub);
+  frag.appendChild(box); frag.appendChild(medio);
+  if(alBorrar){
+    /* v29: era un <span> con onclick. Con el raton funcionaba y con el teclado
+       no: no se puede enfocar, asi que borrar un objeto del kit era imposible
+       sin raton. Ahora es un <button> de verdad. Y por eso la fila deja de ser
+       <button>: meter un boton dentro de otro es HTML invalido y los lectores
+       de pantalla se pierden. */
+    const del=document.createElement('button');
+    del.type='button'; del.className='del';
+    del.setAttribute('aria-label',etiquetaBorrar);
+    del.appendChild(svgIcon('i-close'));
+    del.onclick=(ev)=>{ ev.stopPropagation(); alBorrar(); };
+    frag.appendChild(del);
+  }
+  return frag;
+}
+function renderKit(){
+  const wrap=$('#kitList');
+  const checked=S.kitChecks[todayKey()]||[];
+  wrap.innerHTML='';
+  /* v28: mismo arreglo que en las frases. El id del objeto se metia en el HTML
+     sin escapar y una copia manipulada podia colar atributos. Ahora la fila se
+     construye como elementos y el id viaja por el cierre. */
+  const items=Array.isArray(S.kitItems)?S.kitItems.filter(i=>i&&typeof i==='object'):[];
+  items.forEach(item=>{
+    const done=Array.isArray(checked)&&checked.includes(item.id);
+    const row=filaFila(done,(ev)=>{ if(ev.target.closest&&ev.target.closest('.del')) return; toggleKit(item.id); },item.id);
+    row.appendChild(filaCheck(done,item,'Eliminar del kit',()=>{
+      salirY(row,()=>{ removeKitItem(item.id); });
+    }));
+    wrap.appendChild(row);
+  });
+}
+function toggleKit(id){
+  animarProxima(id,'an-check');
+  const k=todayKey();
+  S.kitChecks[k]=S.kitChecks[k]||[];
+  const i=S.kitChecks[k].indexOf(id);
+  i>=0 ? S.kitChecks[k].splice(i,1) : S.kitChecks[k].push(id);
+  save(); renderKit();
+}
+function addKitItem(){
+  const inp=$('#kitInput');
+  const name=inp.value.trim();
+  if(!name) return;
+  const nuevoId='x'+Date.now();
+  S.kitItems.push({id:nuevoId, name, desc:''});
+  animarProxima(nuevoId,'an-in');
+  inp.value='';
+  save(); renderKit();
+}
+function removeKitItem(id){
+  const i=S.kitItems.findIndex(x=>x.id===id);
+  if(i<0) return;
+  const item=S.kitItems[i];
+  borrarConDeshacer('Objeto eliminado del kit.',
+    ()=>{ S.kitItems.splice(i,1); save(); renderKit(); },
+    ()=>{ S.kitItems.splice(i,0,item); save(); renderKit(); });
+}
+
+/* =================== FRASES =================== */
+let quoteOverride=null; // barajado manual, no persiste
+const QUOTE_FIXES={
+  q2:{old:'Tienes permiso para dejar ir las cosas. Olvida lo irrelevante y perdónate. Ignora la cosa incómoda de la semana pasada. La vida sigue.', neu:'Tienes permiso para soltar las cosas. Olvida lo que no importa y perdónate. Deja correr aquel momento incómodo de la semana pasada. La vida sigue.'},
+  q3:{old:'Las cosas mejoran. No te sientas mal por costarte el estudio o el trabajo: irás mejorando según aprendas estrategias.', neu:'Las cosas mejoran. No te sientas mal porque te cueste estudiar o trabajar: irás mejorando a medida que aprendas estrategias.'},
+  q5:{old:'Suelta la vergüenza: deprime la motivación y solo empeora las cosas. No avergonzarías a alguien en silla de ruedas por no hacer cosas; tu dificultad está en el cerebro en vez de en las piernas, pero es igual de real.', neu:'Suelta la vergüenza: mina la motivación y solo empeora las cosas. No avergonzarías a alguien en silla de ruedas por no hacer cosas; tu dificultad está en el cerebro y no en las piernas, pero es igual de real.'}
+};
+function migrateQuotes(silencioso){
+  /* Arreglo de textos de la v6. Con silencioso=true no llama a save(): así, al
+     traer datos de la nube, no se dispara un guardado ni una subida extra. */
+  let changed=false;
+  Object.keys(QUOTE_FIXES).forEach(id=>{
+    const q=(S.quotes||[]).find(x=>x.id===id);
+    if(q && q.text===QUOTE_FIXES[id].old){ q.text=QUOTE_FIXES[id].neu; changed=true; }
+  });
+  if(changed && !silencioso) save();
+}
+function quotePool(){
+  const favs=S.quotes.filter(q=>q.fav);
+  return favs.length?favs:S.quotes;
+}
+function dayQuote(){
+  const pool=quotePool();
+  if(!pool.length) return null;
+  if(quoteOverride){
+    const q=pool.find(x=>x.id===quoteOverride);
+    if(q) return q;
+    quoteOverride=null;
+  }
+  let h=0; const k=todayKey();
+  for(let i=0;i<k.length;i++) h=(h*31+k.charCodeAt(i))>>>0;
+  return pool[h%pool.length];
+}
+function shuffleQuote(){
+  const pool=quotePool();
+  if(pool.length<2){ toast('Solo hay una frase en el bote: marca más favoritas o añade frases.'); return; }
+  const cur=dayQuote();
+  let q=cur;
+  while(q.id===cur.id) q=pool[Math.floor(Math.random()*pool.length)];
+  quoteOverride=q.id;
+  renderQuotes();
+}
+function renderQuotes(){
+  /* v26: el id de la frase se metia en el HTML sin escapar. Con una copia de
+     seguridad manipulada, un id con comillas se salia del atributo y colaba
+     codigo. Ahora nada de esto se construye con texto: los botones se crean
+     como elementos y el id viaja por la variable del cierre, no por el HTML.
+     Ademas se acepta que quotes venga rota (no lista, sin texto). */
+  const dq=dayQuote();
+  $('#dayQuote').textContent=(dq&&typeof dq.text==='string')?dq.text:'Añade tu primera frase abajo.';
+  const wrap=$('#quoteList');
+  wrap.innerHTML='';
+  const lista=Array.isArray(S.quotes)?S.quotes.filter(q=>q&&typeof q==='object'):[];
+  const sorted=[...lista].sort((a,b)=>(b.fav?1:0)-(a.fav?1:0));
+  sorted.forEach(q=>{
+    const texto=typeof q.text==='string'?q.text:'';
+    const row=document.createElement('div');
+    row.className='quote-row';
+    aplicarAnim(row,q.id);
+
+    const star=document.createElement('button');
+    star.className='qstar'+(q.fav?' on':'');
+    star.setAttribute('aria-label',q.fav?'Quitar de favoritas':'Marcar favorita');
+    star.setAttribute('aria-pressed',q.fav?'true':'false');
+    star.appendChild(svgIcon('i-star',q.fav?'fill':'hollow'));
+    star.onclick=()=>{ const qq=lista.find(x=>x.id===q.id); if(!qq) return;
+      qq.fav=!qq.fav; animarProxima(q.id,'an-star'); quoteOverride=null; save(); renderQuotes(); };
+
+    const span=document.createElement('span');
+    span.className='qtext';
+    span.textContent=texto;
+
+    const del=document.createElement('button');
+    del.className='qdel';
+    del.setAttribute('aria-label','Eliminar frase');
+    del.appendChild(svgIcon('i-close'));
+    del.onclick=()=>{ salirY(row,()=>{
+      const i=S.quotes.findIndex(x=>x.id===q.id);
+      if(i<0) return;
+      const frase=S.quotes[i];
+      borrarConDeshacer('Frase eliminada.',
+        ()=>{ S.quotes.splice(i,1); quoteOverride=null; save(); renderQuotes(); },
+        ()=>{ S.quotes.splice(i,0,frase); quoteOverride=null; save(); renderQuotes(); });
+    }); };
+
+    row.appendChild(star); row.appendChild(span); row.appendChild(del);
+    wrap.appendChild(row);
+  });
+}
+function addQuote(){
+  const inp=$('#quoteInput');
+  const text=inp.value.trim();
+  if(!text) return;
+  const nuevoId='q'+Date.now();
+  S.quotes.push({id:nuevoId, text, fav:false, mine:true});
+  animarProxima(nuevoId,'an-in');
+  inp.value='';
+  save(); renderQuotes();
+}
+
+/* =================== SUEÑO =================== */
+const SLEEP_TECH=[
+  {ok:true, t:'Volcado mental antes de dormir', x:'Escribir 5 minutos la lista de mañana redujo el tiempo en dormirse de 25 a 16 minutos en un estudio con polisomnografía (Baylor, 2018). Cuanto más específica la lista, antes llega el sueño. En papel: el cuaderno junto a la cama.'},
+  {ok:true, t:'Luz de amanecer programada', x:'Lámparas que se encienden gradualmente antes de la alarma aumentan el cortisol del despertar y reducen la inercia del sueño: despiertas con menos atontamiento y menos estrés (Thorn et al., 2004; estudios posteriores).'},
+  {ok:true, t:'Dormitorio fresco', x:'Recomendación médica: 15,6–20 °C, óptimo alrededor de 18 °C (Sleep Foundation, Cleveland Clinic). El calor reduce el sueño profundo y aumenta los despertares.'},
+  {ok:true, t:'Nada activo en pantallas 30 min antes', x:'Restringir el uso del móvil 30 minutos antes de dormir mejoró el tiempo en dormirse, la duración y la calidad en un ensayo aleatorizado (PLoS One, 2020). El daño viene de la activación: en tu caso, el ordenador con shaders.'},
+  {ok:false, t:'Móvil al otro lado de la habitación', x:'Te obliga a levantarte para apagar la alarma y evita el scroll en la cama. Variante: temporizador de 5 minutos con el móvil lejos para forzar la salida de la cama.'},
+  {ok:false, t:'Dos alarmas al despertar', x:'Una temprana para la medicación (y volver a la cama) y otra para levantarte, cuando ya empieza a hacer efecto.'},
+  {ok:false, t:'Compromisos temprano por la mañana', x:'Quedar con alguien o tener algo fijado te saca de la cama porque el compromiso es con otra persona, no contigo.'},
+  {ok:false, t:'Calor al despertar', x:'Subir la temperatura media hora antes de la alarma. La parte de dormir fresco sí está estudiada; esta mitad es experiencia de la comunidad.'}
+];
+function renderSleep(){
+  const wrap=$('#sleepList');
+  const checked=S.sleepChecks[todayKey()]||[];
+  wrap.innerHTML='';
+  const items=Array.isArray(S.sleepItems)?S.sleepItems.filter(i=>i&&typeof i==='object'):[];
+  items.forEach(item=>{
+    const done=Array.isArray(checked)&&checked.includes(item.id);
+    const row=filaFila(done,(ev)=>{
+      if(ev.target.closest&&ev.target.closest('.del')) return;
+      animarProxima(item.id,'an-check');
+      const k=todayKey();
+      S.sleepChecks[k]=S.sleepChecks[k]||[];
+      const i=S.sleepChecks[k].indexOf(item.id);
+      i>=0 ? S.sleepChecks[k].splice(i,1) : S.sleepChecks[k].push(item.id);
+      save(); renderSleep();
+    },item.id);
+    row.appendChild(filaCheck(done,item,'Eliminar paso',()=>{
+      salirY(row,()=>{
+        const i=S.sleepItems.findIndex(x=>x.id===item.id);
+        if(i<0) return;
+        const paso=S.sleepItems[i];
+        borrarConDeshacer('Paso eliminado de la rutina.',
+          ()=>{ S.sleepItems.splice(i,1); save(); renderSleep(); },
+          ()=>{ S.sleepItems.splice(i,0,paso); save(); renderSleep(); });
+      });
+    }));
+    wrap.appendChild(row);
+  });
+  const tech=$('#sleepTech');
+  tech.innerHTML='';
+  SLEEP_TECH.forEach(tc=>{
+    const c=document.createElement('div');
+    c.className='card';
+    c.innerHTML='<span class="pill '+(tc.ok?'teal':'amber')+'">'+(tc.ok?'🟢 Respaldado':'🟡 Comunidad')+'</span>'+
+      '<h3>'+tc.t+'</h3><p>'+tc.x+'</p>';
+    tech.appendChild(c);
+  });
+  const st=$('#shutdownTime');
+  if(st) st.value=(S.sleep&&S.sleep.shutdown)||'';
+}
+function addSleepItem(){
+  const inp=$('#sleepInput');
+  const name=inp.value.trim();
+  if(!name) return;
+  const nuevoId='s'+Date.now();
+  S.sleepItems.push({id:nuevoId, name, desc:''});
+  animarProxima(nuevoId,'an-in');
+  inp.value='';
+  save(); renderSleep();
+}
+function setShutdown(v){
+  S.sleep=S.sleep||{shutdown:''};
+  S.sleep.shutdown=v;
+  save();
+  toast(v?('Hora de cierre fijada: '+v+'. Ponla también como alarma en el móvil.'):'Hora de cierre borrada.');
+}
+
+/* =================== DESPUÉS =================== */
+const AFTER=[
+  {id:'espacio', t:'Estoy en un espacio tranquilo', s:'Poca luz, poco ruido. Vale una habitación a oscuras.'},
+  {id:'agua', t:'He bebido agua', s:'Tu cuerpo acaba de gastar mucho.'},
+  {id:'comida', t:'He comido algo suave', s:'Sin obligación de comida "de verdad".'},
+  {id:'presion', t:'Tacto que reconforta', s:'Manta con peso, chaqueta, algo con textura.'},
+  {id:'descanso', t:'Me he dado permiso para descansar', s:'Sin pantalla de exigencias. Sin volver "ya" a la normalidad.'}
+];
+function renderAfter(){
+  const wrap=$('#afterList');
+  const checked=S.afterChecks[todayKey()]||[];
+  wrap.innerHTML='';
+  AFTER.forEach(item=>{
+    const done=checked.includes(item.id);
+    /* v29: esta lista se habia quedado con el tick de texto mientras Kit y
+       Sueno ya usaban el SVG. Misma fila para las tres. */
+    const row=filaFila(done,()=>{
+      animarProxima(item.id,'an-check');
+      const k=todayKey();
+      S.afterChecks[k]=S.afterChecks[k]||[];
+      const i=S.afterChecks[k].indexOf(item.id);
+      i>=0 ? S.afterChecks[k].splice(i,1) : S.afterChecks[k].push(item.id);
+      save(); renderAfter();
+    },item.id);
+    row.appendChild(filaCheck(done,{name:item.t,desc:item.s},null,null));
+    wrap.appendChild(row);
+  });
+}
+
+/* =================== step-through =================== */
+const FLOWS={
+  tipp:{title:'TIPP', steps:[
+    {ico:'🧊', t:'Temperatura', x:'Agua fría en la cara o en las muñecas, 30 segundos. Frena la activación por vía directa.', timer:30},
+    {ico:'🏃', t:'Intensidad', x:'1 o 2 minutos de movimiento fuerte: sentadillas, subir escaleras, caminar rápido.', timer:60},
+    {ico:'🫁', t:'Pausar la respiración', x:'Respira lento. Que la exhalación dure más que la inhalación: 4 dentro, 6 fuera.', timer:45},
+    {ico:'💪', t:'Progresiva', x:'Tensa los puños 5 segundos. Suelta de golpe. Nota la diferencia. Repite con hombros.', timer:30},
+    {ico:'✅', t:'Hecho', x:'Has trabajado con tu biología, no contra ella. Revisa cómo estás ahora.'}
+  ]},
+  stop:{title:'STOP', steps:[
+    {ico:'✋', t:'Para', x:'No hagas nada todavía. Ni responder, ni decidir, ni enviar.'},
+    {ico:'👣', t:'Da un paso atrás', x:'Físico o mental. Suelta el móvil, apártate, respira una vez.'},
+    {ico:'👀', t:'Observa', x:'¿Qué está pasando fuera? ¿Y dentro de ti? Solo mirar, sin juzgar.'},
+    {ico:'🧭', t:'Procede con cuidado', x:'Ahora sí: ¿qué acción va a favor de lo que te importa?'}
+  ]},
+  nombrar:{title:'Nómbralo', steps:[
+    {ico:'🏷️', t:'Di lo que pasa', x:'En voz alta o por escrito: "Estoy rumiando. Estoy ansioso por no empezar." Nombrar la emoción baja su intensidad.'},
+    {ico:'🎡', t:'Afina la palabra', x:'Si "ansioso" se queda corto, abre tu rueda de emociones y busca la palabra exacta. Precisión = control.'},
+    {ico:'🤝', t:'Sepárate del bucle', x:'"Tengo un pensamiento que dice que soy un desastre" no es lo mismo que "soy un desastre". Es un pensamiento, no un hecho.'}
+  ]},
+  cuerpo:{title:'Mueve el cuerpo', steps:[
+    {ico:'🧍', t:'Levántate', x:'Del escritorio, del sofá, de donde estés atascado. Cambiar de postura ya rompe algo.'},
+    {ico:'🚶', t:'2 minutos de movimiento', x:'Camina por casa, estírate o sal al balcón o a la calle. Descarga la estimulación acumulada.', timer:120},
+    {ico:'💧', t:'Agua', x:'Bebe un vaso. Si sigues acelerado, agua fría en las muñecas.'}
+  ]},
+  micro:{title:'Micro-inicio', steps:[
+    {ico:'🎯', t:'Elige UNA cosa diminuta', x:'No "estudiar". Algo ridículamente pequeño: abrir el archivo, leer un párrafo, escribir una línea.'},
+    {ico:'⏱️', t:'Solo 5 minutos', x:'Ese es el trato completo. A los 5 minutos tienes permiso total para parar.', timer:300},
+    {ico:'🔁', t:'Al acabar, decide', x:'¿Sigo 5 más o paro? Las dos respuestas son victoria: el bucle ya está roto porque has empezado.'}
+  ]},
+  pmr:{title:'Relajación muscular', steps:[
+    {ico:'✊', t:'Manos y brazos', x:'Aprieta los puños y tensa los brazos 5 segundos… y suelta de golpe. Nota cómo pesa la relajación.', timer:15},
+    {ico:'🙆', t:'Hombros y cuello', x:'Sube los hombros hacia las orejas 5 segundos… y déjalos caer.', timer:15},
+    {ico:'😬', t:'Cara', x:'Arruga toda la cara, cierra fuerte los ojos 5 segundos… y afloja. Mandíbula suelta, dientes separados.', timer:15},
+    {ico:'🫃', t:'Tronco', x:'Tensa abdomen y espalda 5 segundos… y suelta soltando también el aire.', timer:15},
+    {ico:'🦵', t:'Piernas y pies', x:'Tensa muslos, gemelos y dedos de los pies 5 segundos… y suelta.', timer:15},
+    {ico:'🌊', t:'Todo el cuerpo', x:'Un repaso mental de pies a cabeza. Donde quede tensión, exhala hacia ahí.'}
+  ]},
+  hechos:{title:'Comprobar los hechos', steps:[
+    {ico:'❓', t:'¿Qué dice el pensamiento?', x:'Escríbelo tal cual: "Nunca voy a aprobar", "he perdido el día entero".'},
+    {ico:'⚖️', t:'¿Qué es literalmente cierto?', x:'¿"Nunca"? ¿"Entero"? La rumiación exagera con palabras absolutas. ¿Cuál es el dato real, con números?'},
+    {ico:'🔄', t:'Reescribe con los hechos', x:'"Hoy llevo 2 horas sin estudiar y me quedan 3 disponibles" es un problema con solución. "Soy un desastre" no lo es.'},
+    {ico:'🎯', t:'Un paso siguiente', x:'Con los hechos delante, ¿cuál es la acción más pequeña posible? (Pista: pestaña Micro-inicio.)'}
+  ]}
+};
+let flow=null, stepIdx=0, stepInterval=null;
+
+function openSteps(id){
+  flow=FLOWS[id]; stepIdx=0;
+  wlAcquire();
+  $('#stepsTitle').textContent=flow.title;
+  $('#stepsOverlay').classList.add('open');
+  renderStep();
+}
+function closeSteps(){
+  $('#stepsOverlay').classList.remove('open');
+  clearInterval(stepInterval);
+  if(!anyExerciseOpen()) wlRelease();
+}
+function stepMove(dir){
+  if(!flow) return;      // v40: sin ejercicio abierto no hay nada que mover
+  clearInterval(stepInterval);
+  stepIdx+=dir;
+  if(stepIdx<0) stepIdx=0;
+  if(stepIdx>=flow.steps.length){ closeSteps(); return; }
+  renderStep();
+}
+function renderStep(){
+  const s=flow.steps[stepIdx];
+  $('#stepCount').textContent=(stepIdx+1)+' / '+flow.steps.length;
+  $('#stepIco').textContent=s.ico;
+  $('#stepTitle').textContent=s.t;
+  $('#stepText').textContent=s.x;
+  $('#stepBack').style.visibility=stepIdx===0?'hidden':'visible';
+  $('#stepNext').textContent=(stepIdx===flow.steps.length-1)?'Terminar':'Siguiente';
+  const timerEl=$('#stepTimer');
+  clearInterval(stepInterval);
+  if(s.timer){
+    let left=s.timer;
+    timerEl.style.display='block';
+    timerEl.textContent=fmtT(left);
+    stepInterval=setInterval(()=>{
+      left--;
+      timerEl.textContent=left>0?fmtT(left):'✓ listo';
+      if(left<=0){ clearInterval(stepInterval); vib([40,80,40]); }
+    },1000);
+  }else{
+    timerEl.style.display='none';
+  }
+}
+const fmtT=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+
+/* =================== respiración 4-7-8 (con vibración) =================== */
+const PHASES=[
+  {label:'Inhala por la nariz', secs:4, scale:1, vib:[40]},
+  {label:'Aguanta', secs:7, scale:1, vib:[40,60,40]},
+  {label:'Exhala por la boca', secs:8, scale:.7, vib:[90]}
+];
+let brRunning=false, brTimer=null, brPhase=0, brLeft=0, brCycles=0;
+
+function openBreath(){
+  $('#breathOverlay').classList.add('open');
+  wlAcquire();
+  $('#breathVibNote').textContent=navigator.vibrate?'El móvil vibra al cambiar de fase: puedes cerrar los ojos.':'';
+  resetBreath();
+}
+function closeBreath(){
+  $('#breathOverlay').classList.remove('open');
+  stopBreath();
+  if(!anyExerciseOpen()) wlRelease();
+}
+function resetBreath(){
+  stopBreath();
+  brCycles=0;
+  $('#breathPhase').textContent='Cuando quieras, pulsa empezar';
+  $('#breathCount').textContent='';
+  $('#breathCycles').textContent='';
+  $('#breathCircle').style.transform='scale(.7)';
+  $('#breathBtn').textContent='Empezar';
+}
+function toggleBreath(){ brRunning?resetBreath():startBreath(); }
+function startBreath(){
+  brRunning=true; brPhase=0;
+  $('#breathBtn').textContent='Parar';
+  runPhase();
+}
+function stopBreath(){ brRunning=false; clearInterval(brTimer); }
+function runPhase(){
+  if(!brRunning) return;
+  const p=PHASES[brPhase];
+  brLeft=p.secs;
+  vib(p.vib);
+  const circ=$('#breathCircle');
+  circ.style.transition='transform '+p.secs+'s linear';
+  circ.style.transform='scale('+p.scale+')';
+  $('#breathPhase').textContent=p.label;
+  $('#breathCount').textContent=brLeft;
+  clearInterval(brTimer);
+  brTimer=setInterval(()=>{
+    brLeft--;
+    if(brLeft>0){
+      $('#breathCount').textContent=brLeft;
+    }else{
+      clearInterval(brTimer);
+      brPhase=(brPhase+1)%PHASES.length;
+      if(brPhase===0){
+        brCycles++;
+        $('#breathCycles').textContent='Ciclos completados: '+brCycles;
+      }
+      runPhase();
+    }
+  },1000);
+}
+
+/* =================== chequeos programados =================== */
+const SLOTS=[
+  {id:'m', ico:'🌅', t:'Mañana'},
+  {id:'t', ico:'☀️', t:'Tarde'},
+  {id:'n', ico:'🌙', t:'Noche'}
+];
+function renderSlots(){
+  const wrap=$('#slotCheck');
+  if(!wrap) return;
+  const done=S.checkins[todayKey()]||[];
+  wrap.innerHTML='';
+  SLOTS.forEach(sl=>{
+    const b=document.createElement('button');
+    b.className=done.includes(sl.id)?'on':'';
+    b.setAttribute('aria-pressed', done.includes(sl.id)?'true':'false');
+    b.innerHTML='<span class="ico">'+sl.ico+'</span>'+sl.t+(done.includes(sl.id)?' ✓':'');
+    b.onclick=()=>{
+      const k=todayKey();
+      S.checkins[k]=S.checkins[k]||[];
+      const i=S.checkins[k].indexOf(sl.id);
+      i>=0 ? S.checkins[k].splice(i,1) : S.checkins[k].push(sl.id);
+      save(); renderSlots(); renderCal();
+    };
+    wrap.appendChild(b);
+  });
+}
+
+/* =================== interocepción =================== */
+const BODY=[
+  {id:'hambre', ico:'🍽️', t:'Hambre', fix:'Come algo, aunque sea pequeño.'},
+  {id:'sed', ico:'💧', t:'Sed', fix:'Un vaso de agua ahora.'},
+  {id:'bano', ico:'🚻', t:'Baño', fix:'Ve ya. En serio.'},
+  {id:'calor', ico:'🌡️', t:'Calor o frío', fix:'Quita o ponte una capa; la temperatura desregula.'},
+  {id:'tension', ico:'🪨', t:'Tensión muscular', fix:'Relajación muscular (pestaña Bucle) o estírate 1 minuto.'},
+  {id:'cansancio', ico:'🥱', t:'Cansancio', fix:'Pausa real de 10 minutos sin pantalla, o siesta corta.'}
+];
+let bodyOn=new Set();
+function renderBody(){
+  const wrap=$('#bodyCheck');
+  wrap.innerHTML='';
+  BODY.forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className=bodyOn.has(b.id)?'on':'';
+    btn.innerHTML='<span class="ico">'+b.ico+'</span>'+b.t;
+    btn.onclick=()=>{
+      bodyOn.has(b.id)?bodyOn.delete(b.id):bodyOn.add(b.id);
+      renderBody();
+    };
+    wrap.appendChild(btn);
+  });
+  const res=$('#bodyResult');
+  if(bodyOn.size===0){
+    res.style.display='none';
+  }else{
+    res.style.display='block';
+    res.innerHTML='<h3 style="margin-bottom:6px;">Antes de nada:</h3><p>'+
+      BODY.filter(b=>bodyOn.has(b.id)).map(b=>'• '+b.fix).join('<br>')+
+      '</p>';
+  }
+}
+
+/* =================== calendario =================== */
+const MOOD_DEFS=[
+  {id:'calm',  em:'😌', label:'Tranquilo'},
+  {id:'anx',   em:'😟', label:'Ansioso'},
+  {id:'tense', em:'😬', label:'Tenso'},
+  {id:'storm', em:'🌩️', label:'Sobrecarga'}
+];
+const MOOD_ICO=Object.fromEntries(MOOD_DEFS.map(m=>[m.id,m.em]));
+let calDate=new Date();
+let pickKey=null;
+
+function calMove(dir){
+  calDate.setMonth(calDate.getMonth()+dir);
+  renderCal();
+}
+function renderCal(){
+  const y=calDate.getFullYear(), m=calDate.getMonth();
+  $('#calTitle').textContent=calDate.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+  const grid=$('#calGrid');
+  grid.innerHTML='';
+  ['L','M','X','J','V','S','D'].forEach(d=>{
+    const el=document.createElement('div');
+    el.className='dow'; el.textContent=d;
+    grid.appendChild(el);
+  });
+  const first=new Date(y,m,1);
+  let offset=(first.getDay()+6)%7;
+  for(let i=0;i<offset;i++){
+    const el=document.createElement('div');
+    el.className='cal-day empty';
+    grid.appendChild(el);
+  }
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const tk=todayKey();
+  const counts={calm:0,anx:0,tense:0,storm:0,sos:0,checks:0};
+  for(let d=1; d<=daysInMonth; d++){
+    const key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const rec=S.days[key]||{};
+    if(rec.mood && counts[rec.mood]!==undefined) counts[rec.mood]++;
+    if(rec.sos) counts.sos++;
+    counts.checks+=(S.checkins[key]||[]).length;
+    const el=document.createElement('button');
+    el.className='cal-day'+(key===tk?' today':'')+(rec.mood?' mood-'+rec.mood:'');
+    el.setAttribute('aria-label','Día '+d);
+    const ck=S.checkins[key]||[];
+    el.innerHTML=(rec.mood&&MOOD_ICO[rec.mood]?'<span class="mood">'+MOOD_ICO[rec.mood]+'</span>':'')+
+      '<span>'+d+'</span>'+
+      (rec.sos?'<span class="sos-dot"></span>':'')+
+      (rec.note?'<span class="note-dot"></span>':'')+
+      '<span class="cal-checks">'+['m','t','n'].map(x=>'<i class="'+(ck.includes(x)?'on':'')+'"></i>').join('')+'</span>';
+    el.onclick=()=>openMoodPick(key, d);
+    grid.appendChild(el);
+  }
+  const parts=MOOD_DEFS
+    .filter(md=>counts[md.id]>0)
+    .map(md=>md.em+' <b>'+counts[md.id]+'</b>');
+  if(counts.sos>0) parts.push('<span style="color:var(--coral)">SOS</span> <b>'+counts.sos+'</b>');
+  if(counts.checks>0) parts.push('🫀 <b>'+counts.checks+'</b> chequeos');
+  $('#calSummary').innerHTML=parts.length?parts.join(' '):'<span style="color:var(--faint)">Sin registros este mes.</span>';
+  pintarNotasImpresas(y,m);
+}
+/* v34 (C10): en pantalla la nota es un punto ambar que se abre al pulsar. En
+   papel no se puede pulsar nada, asi que las notas del mes van escritas debajo
+   del calendario. Este bloque solo se ve al imprimir (@media print). */
+function pintarNotasImpresas(y,m){
+  const cont=$('#printNotas'); if(!cont) return;
+  cont.innerHTML='';
+  const pre=y+'-'+String(m+1).padStart(2,'0')+'-';
+  const claves=Object.keys(S.days||{}).filter(k=>k.indexOf(pre)===0).sort();
+  const conNota=claves.filter(k=>(S.days[k]||{}).note);
+  const h=document.createElement('h4');
+  h.textContent='Notas del mes';
+  h.style.margin='14px 0 6px';
+  cont.appendChild(h);
+  if(!conNota.length){
+    const p=document.createElement('p');
+    p.textContent='Ninguna nota este mes.';
+    cont.appendChild(p);
+    return;
+  }
+  const ul=document.createElement('ul');
+  ul.style.margin='0'; ul.style.paddingLeft='18px';
+  conNota.forEach(k=>{
+    const rec=S.days[k];
+    const li=document.createElement('li');
+    li.style.marginBottom='4px';
+    const b=document.createElement('strong');
+    b.textContent='Día '+Number(k.slice(8))+
+      (MOOD_TXT[rec.mood]?' ('+MOOD_TXT[rec.mood]+')':'')+(rec.sos?' · SOS':'')+': ';
+    li.appendChild(b);
+    /* createElement + textContent: la nota es texto del usuario y nunca HTML */
+    li.appendChild(document.createTextNode(rec.note));
+    ul.appendChild(li);
+  });
+  cont.appendChild(ul);
+}
+function openMoodPick(key, dayNum){
+  pickKey=key;
+  const rec=S.days[key]||{};
+  $('#moodPickTitle').textContent='Día '+dayNum+' — ¿cómo fue?';
+  const opts=$('#moodOpts');
+  opts.innerHTML='';
+  MOOD_DEFS.forEach(md=>{
+    const b=document.createElement('button');
+    b.className=rec.mood===md.id?'sel':'';
+    b.innerHTML='<span class="em">'+md.em+'</span>'+md.label;
+    b.onclick=()=>setMood(md.id);
+    opts.appendChild(b);
+  });
+  /* v24: la marca SOS se ponia sola al pulsar el boton y no habia forma de
+     quitarla; 'Borrar registro' la conservaba a proposito. Ahora hay las dos
+     opciones: quitar solo la marca, o borrar el dia entero. */
+  if(rec.sos){
+    const sb=document.createElement('button');
+    sb.className='clear';
+    sb.style.color='var(--coral)';
+    sb.style.borderColor='var(--coral)';
+    sb.textContent='Quitar la marca SOS';
+    sb.onclick=()=>clearSOS();
+    opts.appendChild(sb);
+  }
+  const clr=document.createElement('button');
+  clr.className='clear';
+  clr.textContent=rec.sos?'Borrar el día entero':'Borrar registro';
+  clr.onclick=()=>setMood(null);
+  opts.appendChild(clr);
+  $('#dayNote').value=rec.note||'';
+  $('#moodPick').classList.add('open');
+}
+function closeMoodPick(){ $('#moodPick').classList.remove('open'); pickKey=null; }
+function clearSOS(){
+  if(!pickKey) return;
+  if(!S.days[pickKey]) return closeMoodPick();
+  const k=pickKey;
+  const previo=deepClone(S.days[k]);
+  borrarConDeshacer('Marca SOS quitada.',
+    ()=>{
+      delete S.days[k].sos;
+      if(!S.days[k].mood && !S.days[k].note) delete S.days[k];
+      save(); renderCal(); closeMoodPick();
+    },
+    ()=>{ S.days[k]=previo; save(); renderCal(); });
+}
+window.clearSOS=clearSOS;
+function setMood(mood){
+  if(!pickKey) return;
+  S.days[pickKey]=S.days[pickKey]||{};
+  if(mood===null){
+    const k=pickKey;
+    const previo=deepClone(S.days[k]);
+    borrarConDeshacer('Registro del día borrado.',
+      ()=>{ delete S.days[k]; save(); renderCal(); closeMoodPick(); },
+      ()=>{ S.days[k]=previo; save(); renderCal(); });
+    return;
+  }else{
+    S.days[pickKey].mood=mood;
+    applyNote();
+  }
+  save(); renderCal(); closeMoodPick();
+}
+function applyNote(){
+  const note=$('#dayNote').value.trim();
+  if(note) S.days[pickKey].note=note;
+  else delete S.days[pickKey].note;
+}
+function saveDayNote(){
+  if(!pickKey) return;
+  S.days[pickKey]=S.days[pickKey]||{};
+  applyNote();
+  if(!S.days[pickKey].mood && !S.days[pickKey].note && !S.days[pickKey].sos) delete S.days[pickKey];
+  save(); renderCal(); closeMoodPick();
+}
+
+/* =================== copia de seguridad =================== */
+function genBackup(){
+  const payload={app:'calma', v:BK_VERSION, exported:new Date().toISOString(), state:S, theme:THEME};
+  $('#backupTA').value=JSON.stringify(payload);
+  marcarCopia();          // para el aviso de "hace X días"
+  renderBackupNote();
+  toast('Copia generada. Cópiala y guárdala donde quieras.');
+}
+const BK_VERSION = 5;   // versión del envoltorio que esta app sabe leer
+
+function marcarCopia(){
+  S.__backup = {last: Date.now()};
+  save();
+}
+function diasDesdeCopia(){
+  const t = S.__backup && S.__backup.last;
+  if(!t) return null;
+  return Math.floor((Date.now()-t)/86400000);
+}
+function renderBackupNote(){
+  const el=$('#bkNote'); if(!el) return;
+  const d=diasDesdeCopia();
+  if(d===null){
+    el.innerHTML='<div class="bk-note aviso">Todav\u00eda no has guardado ninguna copia. Con la nube activa sigues necesit\u00e1ndola: la nube copia tambi\u00e9n los borrados.</div>';
+    return;
+  }
+  if(d>7){
+    el.innerHTML='<div class="bk-note aviso">Hace '+d+' d\u00edas de tu \u00faltima copia. Toca hacer una.</div>';
+    return;
+  }
+  el.innerHTML='<div class="bk-note">\u00daltima copia: hace '+(d===0?'menos de un d\u00eda':(d===1?'un d\u00eda':d+' d\u00edas'))+'.</div>';
+}
+
+function pedirArchivo(){ const f=$('#bkFile'); if(f){ f.value=''; f.click(); } }
+function leerArchivo(input){
+  const file = input && input.files && input.files[0];
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = () => { $('#backupTA').value = String(r.result||''); importBackup(); };
+  r.onerror = () => toast('No se pudo leer el archivo.');
+  r.readAsText(file);
+}
+
+/* =================== exportar para leer (v34 - C1) ===================
+   La copia JSON sirve para restaurar, no para leer. Esto saca los mismos datos
+   en dos formatos que se abren fuera de la app: CSV para una hoja de calculo y
+   Markdown para imprimir o pasar a alguien.
+   OJO, no es una copia de seguridad: no lleva el tema, ni el kit, ni las
+   frases, y NO se puede reimportar. Para restaurar sigue estando el JSON. */
+
+/* Una celda que empieza por = + - @ la ejecuta Excel y LibreOffice como
+   formula. Una nota tuya que empiece por "-" bastaria. Se antepone un
+   apostrofo, que las hojas de calculo entienden como "esto es texto". */
+function celdaSegura(txt){
+  const t=String(txt==null?'':txt);
+  return /^[=+\-@\t\r]/.test(t) ? ("'"+t) : t;
+}
+function csvCampo(txt){
+  const t=celdaSegura(txt).replace(/"/g,'""');
+  return '"'+t+'"';
+}
+function diasOrdenados(){
+  return Object.keys(S.days||{}).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k)).sort();
+}
+const MOOD_TXT={calm:'Tranquilo', anx:'Ansioso', tense:'Tenso', storm:'Sobrecarga'};
+const SLOT_TXT={m:'mañana', t:'tarde', n:'noche'};
+
+function exportCSV(){
+  const cab=['fecha','estado','sos','chequeos','nota'];
+  const filas=[cab.map(csvCampo).join(',')];
+  diasOrdenados().forEach(k=>{
+    const r=S.days[k]||{};
+    const ck=(S.checkins[k]||[]).map(x=>SLOT_TXT[x]||x).join(' ');
+    filas.push([k, MOOD_TXT[r.mood]||'', r.sos?'sí':'', ck, r.note||''].map(csvCampo).join(','));
+  });
+  /* BOM al principio: sin el, Excel abre el archivo en la codificacion del
+     sistema y los acentos salen rotos. */
+  descargarTexto('\ufeff'+filas.join('\r\n'), 'calma-registro', 'csv', 'text/csv');
+}
+
+function exportMD(){
+  const dias=diasOrdenados();
+  const L=['# Registro de Calma','', 'Generado el '+new Date().toLocaleDateString('es-ES')+
+    ' · '+dias.length+' días registrados', ''];
+  let mesActual='';
+  dias.forEach(k=>{
+    const mes=k.slice(0,7);
+    if(mes!==mesActual){
+      mesActual=mes;
+      const d=new Date(k+'T12:00:00');
+      L.push('', '## '+d.toLocaleDateString('es-ES',{month:'long',year:'numeric'}), '');
+      const delMes=dias.filter(x=>x.slice(0,7)===mes);
+      const cuenta={};
+      delMes.forEach(x=>{ const mo=(S.days[x]||{}).mood; if(mo) cuenta[mo]=(cuenta[mo]||0)+1; });
+      const resumen=Object.keys(MOOD_TXT).filter(m=>cuenta[m]).map(m=>MOOD_TXT[m]+': '+cuenta[m]);
+      const sos=delMes.filter(x=>(S.days[x]||{}).sos).length;
+      if(sos) resumen.push('SOS: '+sos);
+      if(resumen.length) L.push('_'+resumen.join(' · ')+'_', '');
+      L.push('| Día | Estado | Chequeos | Nota |','|---|---|---|---|');
+    }
+    const r=S.days[k]||{};
+    const ck=(S.checkins[k]||[]).map(x=>SLOT_TXT[x]||x).join(', ');
+    /* la barra vertical parte una tabla de Markdown por la mitad */
+    const nota=String(r.note||'').replace(/\|/g,'\\|').replace(/\n/g,' ');
+    L.push('| '+k.slice(8)+' | '+(MOOD_TXT[r.mood]||'—')+(r.sos?' · SOS':'')+
+      ' | '+(ck||'—')+' | '+(nota||'') +' |');
+  });
+  if(!dias.length) L.push('_Todavía no hay ningún día registrado._');
+  descargarTexto(L.join('\n'), 'calma-registro', 'md', 'text/markdown');
+}
+
+/* Descarga compartida: la usan el CSV, el Markdown y la copia JSON. */
+function descargarTexto(texto, base, ext, tipo){
+  const d=new Date();
+  const nombre=base+'-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+
+    '-'+String(d.getDate()).padStart(2,'0')+'.'+ext;
+  try{
+    const blob=new Blob([texto], {type:tipo});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=nombre;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    toast('Descargada como '+nombre);
+    return true;
+  }catch(e){
+    toast('No se pudo descargar aquí. Prueba desde el navegador, no desde la app instalada.');
+    return false;
+  }
+}
+/* v35: dentro de un iframe restringido (por ejemplo la vista previa de Claude)
+   el navegador bloquea window.print() y confirm() SIN avisar. La funcion se
+   queda a medias y parece que el boton esta roto. Esto lo detecta para poder
+   decirlo en vez de no hacer nada.
+   Para revertir, devolver false siempre: se recupera el silencio de la v34. */
+function entornoLimitado(){
+  try{ return window.self !== window.top; }catch(e){ return true; }
+}
+const AVISO_LIMITADO = 'Aquí no funciona: estás viendo la app incrustada en otra página y el navegador bloquea estos diálogos. Ábrela en una pestaña normal o en la app instalada.';
+
+function imprimirRegistro(){
+  /* La hoja de estilos de impresion deja solo el calendario y las notas del
+     mes que estes viendo. Ver el bloque @media print. */
+  if(entornoLimitado()){ toast(AVISO_LIMITADO); return; }
+  try{ window.print(); }catch(e){ toast('Este navegador no deja imprimir desde aquí.'); }
+}
+
+function downloadBackup(){
+  /* Descarga la copia como archivo, con la fecha en el nombre. En el móvil,
+     copiar un texto de miles de caracteres es incómodo y fácil de cortar. */
+  if(!$('#backupTA').value) genBackup();
+  const texto=$('#backupTA').value;
+  const d=new Date();
+  const nombre='calma-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
+  try{
+    const blob=new Blob([texto], {type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=nombre;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    toast('Descargada como '+nombre);
+  }catch(e){
+    toast('No se pudo descargar aquí. Usa "Copiar" y pégala en una nota.');
+  }
+}
+async function copyBackup(){
+  const ta=$('#backupTA');
+  if(!ta.value){ toast('Primero pulsa "Generar copia".'); return; }
+  ta.select(); ta.setSelectionRange(0, ta.value.length);
+  let ok=false;
+  try{ await navigator.clipboard.writeText(ta.value); ok=true; }catch(e){
+    try{ ok=document.execCommand('copy'); }catch(e2){}
+  }
+  toast(ok?'Copiado al portapapeles.':'No pude copiar solo. El texto queda seleccionado: mantén pulsado para copiar.');
+}
+function importBackup(){
+  const raw=$('#backupTA').value.trim();
+  if(!raw){ toast('Pega primero una copia en el cuadro.'); return; }
+  let o;
+  try{ o=JSON.parse(raw); }catch(e){ toast('Eso no es una copia válida (JSON incorrecto).'); return; }
+  if(!o || o.app!=='calma' || !o.state){ toast('Eso no parece una copia de esta app.'); return; }
+  /* v44: aqui habia tres confirm(). Los dos primeros eran AVISOS (copia sin
+     version, o de un formato mas nuevo), no preguntas de verdad, y en un visor
+     incrustado se bloqueaban y cancelaban la importacion sin decir por que.
+     Ahora se importa y el aviso viaja en la barra de deshacer, que ademas
+     permite volver atras de verdad: se guarda el estado ENTERO de antes. */
+  let aviso='';
+  if(typeof o.v!=='number') aviso=' La copia no dice de qué versión es.';
+  else if(o.v>BK_VERSION) aviso=' Ojo: es de un formato más nuevo ('+o.v+'), puede faltar parte.';
+  const cuando = o.exported ? (' del '+new Date(o.exported).toLocaleString('es-ES')) : '';
+  const estadoPrevio = deepClone(S);
+  const temaPrevio = JSON.parse(JSON.stringify(THEME));
+  /* v26: deepClone pasa por JSON, que descarta __proto__, pero el Object.assign
+     de despues si dispara el setter. Se limpian las claves peligrosas antes. */
+  /* v33: la limpieza que vivia suelta aqui es ahora saneEstado(), compartida
+     con loadState y setState. Misma proteccion por las tres puertas. */
+  S=Object.assign(deepClone(DEFAULT_STATE), saneEstado(o.state,'copia'));
+  migrateQuotes();
+  if(o.theme){
+    if(o.theme.mode==='dark'||o.theme.mode==='light'||o.theme.mode==='auto')THEME.mode=o.theme.mode;
+    if(o.theme.dark&&normHex(o.theme.dark))THEME.dark=normHex(o.theme.dark);
+    if(o.theme.light&&normHex(o.theme.light))THEME.light=normHex(o.theme.light);
+    THEME.hc=!!o.theme.hc;
+    if(o.theme.ts&&TS_STEPS.indexOf(o.theme.ts)>=0)THEME.ts=o.theme.ts;
+    /* v26: los ajustes de acento se exportaban pero no se volvian a leer al
+       importar, asi que una copia restaurada perdia el acento elegido. */
+    if(o.theme.accMode&&ACC_MODES.indexOf(o.theme.accMode)>=0)THEME.accMode=o.theme.accMode;
+    if(o.theme.accDark&&normHex(o.theme.accDark))THEME.accDark=normHex(o.theme.accDark);
+    if(o.theme.accLight&&normHex(o.theme.accLight))THEME.accLight=normHex(o.theme.accLight);
+    if(typeof o.theme.anim==='boolean')THEME.anim=o.theme.anim;
+    if(ANIM_STEPS.indexOf(o.theme.animMs)>=0)THEME.animMs=o.theme.animMs;
+    saveTheme(); applyTheme();
+  }
+  save(); renderAll();
+  /* La barra se pinta DESPUES de que todo este aplicado: si algo revienta antes,
+     no se ofrece una salida que no existe. Deshacer devuelve el estado ENTERO
+     y el tema, que es lo unico que una importacion se lleva por delante. */
+  borrarConDeshacer('Copia importada'+cuando+'.'+aviso,
+    ()=>{},
+    ()=>{
+      S=estadoPrevio;
+      Object.keys(temaPrevio).forEach(function(k){ THEME[k]=temaPrevio[k]; });
+      saveTheme(); applyTheme(); save(); renderAll();
+      toast('Importación deshecha.');
+    });
+}
+
+
+/* =================== despachador de eventos (v27) ===================
+   Antes cada boton llevaba onclick="algo()" escrito en el HTML. Eso obliga a
+   permitir codigo en linea y convierte cualquier atributo mal escapado en una
+   posible ejecucion. Ahora el HTML solo declara QUE accion quiere, con
+   data-act, y aqui se decide si esa accion existe y se ejecuta. La lista
+   blanca es lo importante: un data-act que no este en ella no hace nada,
+   aunque alguien consiga inyectarlo. Nunca se evalua texto como codigo. */
+var ACCIONES=['addKitItem','addQuote','addSleepItem','calMove','cerrarSiFondo','closeBreath',
+ 'closeSteps','cloudSync','copyBackup','downloadBackup','genBackup','goSOS','importBackup',
+ 'openBreath','openSteps','pedirArchivo','probarGuardado','saveDayNote','setAccMode','setTS',
+ 'setTab','setThemeMode','shuffleQuote','stepMove','thTogglePeek','toggleBreath','toggleDiag',
+ 'exportCSV','exportMD','imprimirRegistro',
+ 'toggleHC','toggleThemePop','uiDisconnect','uiLogin','uiSignup','uiTogglePass',
+ /* v38: uiResolve faltaba desde la v27. Los dos botones del cuadro de conflicto
+    de nube no hacian NADA al pulsarlos: el despachador los bloqueaba por no
+    estar autorizados. No se detecto antes porque ese cuadro solo aparece
+    cuando hay un conflicto de verdad entre dos dispositivos. */
+ 'uiResolve',
+ 'setThemeDark','setThemeLight','toggleAnim','setAnimMs',
+ 'reintentarLectura','traerDeNube','empezarDeCero','deshacer'];
+var CAMBIOS=['leerArchivo','setAccColor','setShutdown','setThemeDark','setThemeLight'];
+
+/* el fondo oscuro del selector de dia: cerrar solo si se pulsa el fondo, no la tarjeta */
+function cerrarSiFondo(ev,el){ if(ev.target===el) closeMoodPick(); }
+window.cerrarSiFondo=cerrarSiFondo;
+
+function accionDe(nombre,permitidas){
+  if(permitidas.indexOf(nombre)<0) return null;      // lista blanca
+  var f=window[nombre];
+  return (typeof f==='function')?f:null;
+}
+document.addEventListener('click',function(ev){
+  var el=ev.target.closest?ev.target.closest('[data-act]'):null;
+  if(!el) return;
+  var f=accionDe(el.getAttribute('data-act'),ACCIONES);
+  if(!f) return;
+  var arg=el.getAttribute('data-arg');
+  if(el.getAttribute('data-act')==='cerrarSiFondo') return f(ev,el);
+  if(arg===null) return f();
+  return f(/^-?\d+$/.test(arg)?Number(arg):arg);
+});
+document.addEventListener('change',function(ev){
+  var el=ev.target.closest?ev.target.closest('[data-chg]'):null;
+  if(!el) return;
+  var f=accionDe(el.getAttribute('data-chg'),CAMBIOS);
+  if(!f) return;
+  return f(el.hasAttribute('data-chg-el')?el:el.value);
+});
+
+/* =================== init =================== */
+/* Cada pestaña sabe qué tiene que redibujar. Antes se repintaban las ocho en
+   cada sincronización o importación, incluido el calendario entero; ahora solo
+   la visible, y el resto se redibuja al abrirla. */
+const TAB_RENDER = {
+  ahora:    [],
+  despues:  [renderAfter],
+  kit:      [renderKit],
+  bucle:    [],
+  sueno:    [renderSleep],
+  frases:   [renderQuotes],
+  cuerpo:   [renderBody, renderSlots],
+  registro: [renderDiag, renderCloud, renderCal, renderBackupNote]
+};
+let tabActual = 'kit';
+function renderTab(name){
+  (TAB_RENDER[name]||[]).forEach(f=>{ try{ f(); }catch(e){} });
+}
+function renderAll(){ renderTab(tabActual); }
+$('#todayLabel').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long', day:'numeric', month:'long'});
+$('#kitInput').addEventListener('keydown',e=>{if(e.key==='Enter')addKitItem();});
+$('#sleepInput').addEventListener('keydown',e=>{if(e.key==='Enter')addSleepItem();});
+$('#quoteInput').addEventListener('keydown',e=>{if(e.key==='Enter')addQuote();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ closeMoodPick(); $('#themePop').classList.add('hidden'); }
+});
+/* ---------- pie de versión (diagnóstico de caché) ----------
+   APP_VERSION vive en el HTML; el nombre de la caché lo dice el navegador.
+   Si no coinciden los números, el dispositivo está sirviendo una versión
+   antigua guardada: hay que cerrar la app del todo y abrirla dos veces. */
+async function renderVersion(){
+  const a=$('#verApp'), c=$('#verCache'); if(!a||!c) return;
+  a.textContent = 'Calma ' + APP_VERSION;
+  if(!('caches' in window)){ c.textContent = 'caché: no aplica'; return; }
+  try{
+    const keys = await caches.keys();
+    const mine = keys.filter(k=>k.indexOf('calma-cache-')===0);
+    if(!mine.length){ c.textContent = 'caché: ninguna'; return; }
+    const num = mine[0].replace('calma-cache-','');
+    c.textContent = 'caché: ' + num;
+    if(num !== APP_VERSION) c.textContent += ' ⚠ desajuste';
+  }catch(e){ c.textContent = 'caché: no se pudo leer'; }
+}
+renderVersion();
+setTab('kit', false);
+loadTheme().then(applyTheme);
+loadState().then(()=>cloudInit());
+window.addEventListener('online',()=>{ if(CLOUD.session) cloudSync(); });
+</script>
+</body>
+</html>
